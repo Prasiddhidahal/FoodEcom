@@ -1,0 +1,32 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Category List Section -->
+<section class="category-list spad">
+    <div class="container">
+        <div class="section-title">
+            <h2>Categories</h2>
+        </div>
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-lg-4 col-md-6">
+                <div class="category-item">
+                    <div class="category-item__pic">
+                        <img src="{{ category.image.url }}" alt="{{ category.title }}">
+                    </div>
+                    <div class="category-item__text">
+                        <h5>{{ category.title }}</h5>
+                        <span class="category-count">Products: {{ category.product_count }}</span>
+                        <!-- Link to category product list -->
+                        <a href="{% url 'core:category_product_list' cid=category.cid %}">View Products</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No categories available.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

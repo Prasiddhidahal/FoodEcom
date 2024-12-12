@@ -1,0 +1,412 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% block content %}
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-section set-bg" data-setbg="{% static 'img/breadcrumb.jpg' %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="breadcrumb__text">
+                    <h2>{{ product.title }}</h2>
+                    <div class="breadcrumb__option">
+                        <a href="{% url 'core:index' %}">Home</a>
+                        <a href="{% url 'core:index' %}">Products</a>
+                        <span>{{ product.title }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+
+<!-- Product Details Section Begin -->
+<section class="product-details spad">
+    <div class="container">
+        <div class="row">
+            <!-- Product Image Section -->
+            <div class="col-lg-6 col-md-6">
+                <div class="product__details__pic">
+                    <div class="product__details__pic__item">
+                        <img class="product__details__pic__item--large" src="{{ product.image.url }}" alt="{{ product.title }}">
+                    </div>
+                    <div class="product__details__pic__slider owl-carousel">
+                        <img data-imgbigurl="{{ product.image.url }}" src="{{ product.image.url }}" alt="{{ product.title }}">
+                        {% for img in products_images %}
+                            <img data-imgbigurl="{{ img.image.url }}" src="{{ img.image.url }}" alt="{{ img.title }}">
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Information Section -->
+            <div class="col-lg-6 col-md-6">
+                <div class="product__details__text">
+                    <h3>{{ product.title }}</h3>
+                    <div class="product__details__rating">
+                        <h6>Average Rating= {{ average_rating|floatformat }}</h6>
+                    </div>
+
+                    <!-- Product Price Section -->
+                    <style>
+                        .old-price { text-decoration: line-through; color: #ff0000; }
+                        .discounted-price { color: #28a745; font-weight: bold; }
+                    </style>
+
+                    {% if product.old_price %}
+                        <div class="product__details__price">
+                            <span class="old-price">${{ product.old_price }}</span>
+                            <span class="discounted-price">${{ product.price }}</span>
+                        </div>
+                    {% else %}
+                        <div class="product__details__price">${{ product.price }}</div>
+                    {% endif %}
+
+                    <p>{{ product.description|safe }}</p>
+
+                    <!-- Quantity Selection and Add to Cart -->
+                    <div class="product__details__quantity">
+                        <div class="quantity">
+                            <div class="pro-qty">
+                                <input type="text" value="1">
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" class="primary-btn">ADD TO CART</a>
+                    <a href="#" class="heart-icon"><span class="icon_heart_alt"></span></a>
+
+                    <!-- Additional Product Information -->
+                    <ul>
+                        <li><b>Vendor</b> <span>{{ product.vendor.title }}</span></li>
+                        <li><b>Shipping</b> <span>{{ product.shipping }}</span></li>
+                        <li><b>Weight</b> <span>{{ product.weight }}</span></li>
+                        <li><b>Color</b> <span>{{ product.color }}</span></li>
+                        <li><b>Tags:</b>
+                            {% for tag in product.tags.all %}
+                                <a href="{% url 'core:tag_list' tag.slug %}" style="color: blue;">#{{ tag.name }}</a>
+                            {% endfor %}
+                        </li>
+                        <li><b>MFD</b> <span>{{ product.mfd }}</span></li>
+                        <li><b>EXP</b> <span>{{ product.life }} days</span></li>
+                        <li><b>Stock</b> <span>{{ product.stock_quantity }}</span></li>
+                        <li><b>Share on</b>
+                            <div class="share">
+                                <a href="#"><i class="fa fa-facebook"></i></a>
+                                <a href="#"><i class="fa fa-twitter"></i></a>
+                                <a href="#"><i class="fa fa-instagram"></i></a>
+                                <a href="#"><i class="fa fa-pinterest"></i></a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs for Description, Information, Reviews -->
+        <div class="col-lg-12">
+            <div class="product__details__tab">
+                <!-- Tab Navigation -->
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab" aria-selected="true">Product Description</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab" aria-selected="false">Additional Information</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab" aria-selected="false">Vendor</a></li>
+                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabs-4" role="tab" aria-selected="false">Reviews <span>(1)</span></a></li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="tabs-1" role="tabpanel">
+                        <p>{{ product.description|safe }}</p>
+                    </div>
+                    <div class="tab-pane fade" id="tabs-2" role="tabpanel">
+                        <p>Here you can add any additional information such as specifications, ingredients, etc.</p>
+                    </div>
+                    <div class="tab-pane fade" id="tabs-3" role="tabpanel">
+                        <p><b>Vendor:</b> {{ product.vendor.title }}</p>
+                        <p><b>Shipping:</b> {{ product.shipping }}</p>
+                        <p><b>Weight:</b> {{ product.weight }} kg</p>
+                        <p><b>Description:</b> {{ product.description }}</p>
+                        <a href="{% url 'core:vendor_products' vid=product.vendor.id %}">
+                            <img src="{{ product.vendor.image.url }}" alt="{{ product.vendor.title }}" width="100" height="100">
+                        </a>
+                        <p><b>Status:</b> {{ product.vendor.status }}</p>
+                        <p><b>Address:</b> {{ product.vendor.address }}</p>
+                    </div>
+
+                    <div class="tab-pane fade" id="tabs-4" role="tabpanel">
+                        <p>Customer Reviews</p>
+                        {% for r in review %}
+                        <div class="review">
+                            <div class="review__item">
+                                <h6>{{ r.user.username|title }}</h6>
+                                <p>{{ r.date|date:"F j, Y" }}</p>
+                                <p>{{ r.review }}</p>
+                                <p>Rating: {{ r.rating }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                      <div class="form hide-comment-form">
+    <form id="commentForm" action="{% url 'core:add_review' pid=product.id %}" method="POST">
+        {% csrf_token %}
+        <textarea name="review" required placeholder="Write your review here"></textarea>
+        <input type="number" name="rating" min="1" max="5" required placeholder="Rating (1-5)">
+        <button type="submit">Submit</button>
+    </form>
+</div>
+
+
+                                {% comment %} <div class="form-group">
+                                    <label for="rating">{{ review_form.rating }}</label>
+                                    <input type="number" class="form-control" id="rating" name="rating" min="1" max="5">
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form> {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Product Details Section End -->
+
+<style>
+    /* General Layout and Spacing */
+    .product__details {
+        padding: 40px 0;
+    }
+
+    .product__details__pic__slider img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .product__details__text {
+        margin-top: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .product__details__text h3 {
+        font-size: 28px;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .product__details__text p {
+        font-size: 16px;
+        line-height: 1.5;
+        margin-bottom: 15px;
+        color: #555;
+    }
+
+    .product__details__price {
+        font-size: 22px;
+        font-weight: bold;
+        color: #28a745;
+        margin-bottom: 10px;
+    }
+
+    .old-price {
+        text-decoration: line-through;
+        color: #ff0000; /* Red color for old price */
+        margin-right: 10px;
+        font-size: 18px;
+    }
+
+    .discounted-price {
+        color: #28a745; /* Green color for discounted price */
+        font-weight: bold;
+        font-size: 22px;
+    }
+
+    .product__details__quantity {
+        margin-top: 20px;
+    }
+
+    /* Review Section */
+    .review__item {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .review__item h6 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .review__item p {
+        font-size: 14px;
+        color: #555;
+    }
+
+    .review__item p span {
+        font-weight: bold;
+    }
+
+    /* Review Form */
+    .form {
+        margin-top: 30px;
+        background-color: #f8f8f8;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    .form h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .form .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form label {
+        font-size: 14px;
+        color: #333;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .form input[type="number"] {
+        padding: 10px;
+        width: 100%;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    .form button {
+        padding: 10px 20px;
+        background-color: #28a745;
+        border: none;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+    .form button:hover {
+        background-color: #218838;
+    }
+
+    /* Tab Styles */
+    .nav-tabs {
+        margin-bottom: 20px;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .nav-tabs .nav-link {
+        font-size: 16px;
+        color: #333;
+        border: none;
+        padding: 10px 20px;
+        transition: background-color 0.3s;
+    }
+
+    .nav-tabs .nav-link.active {
+        background-color: #28a745;
+        color: white;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .nav-tabs .nav-link:hover {
+        background-color: #f1f1f1;
+    }
+
+    .tab-content {
+        border-top: 2px solid #ddd;
+        padding-top: 20px;
+    }
+
+    .tab-pane {
+        font-size: 16px;
+        color: #555;
+    }
+
+    .tab-pane p {
+        margin-bottom: 15px;
+    }
+
+    /* Product Info and Vendor Section */
+    .product__details__text ul {
+        list-style: none;
+        padding-left: 0;
+        margin-top: 20px;
+    }
+
+    .product__details__text ul li {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .product__details__text ul li b {
+        color: #333;
+    }
+
+    .product__details__text .share a {
+        font-size: 18px;
+        color: #333;
+        margin-right: 15px;
+        transition: color 0.3s ease;
+    }
+
+    .product__details__text .share a:hover {
+        color: #28a745;
+    }
+
+    .product__details__pic__item--large {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    .product__details__pic__item img {
+        max-width: 100%;
+        display: block;
+        margin: 0 auto;
+    }
+</style>
+
+
+<!-- Related Products Section -->
+<section class="related-product">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="section-title related__product__title">
+                    <h2>Related Products</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+    {% for product in related_products %}
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="product__item">
+            <div class="product__item__pic set-bg" data-setbg="{{ product.image.url }}">
+                <div class="title">{{ product.title }}</div>
+                <ul class="product__item__pic__hover">
+                    <!-- Correct URL generation -->
+                    <li><a href="{% url 'core:pages1' product.id %}"><i class="fa fa-eye"></i></a></li>
+                    <li><a href="#"><i class="fa fa-heart"></i></a></li>
+                    <li><a href="#"><i class="fa fa-retweet"></i></a></li>
+                    <li><a href="#"><i class="fa fa-shopping-cart"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+    </div>
+</section>
+{% endblock %}

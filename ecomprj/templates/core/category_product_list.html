@@ -1,0 +1,39 @@
+{% extends 'partials/base.html' %}
+{% load static %}
+
+{% block content %}
+<!-- Category Product List Section -->
+<section class="category-product-list spad">
+    <div class="container">
+        <div class="section-title">
+            <h2>Products in "{{ category.title }}"</h2>
+        </div>
+        <div class="row">
+            {% for product in products %}
+            <div class="col-lg-4 col-md-6">
+                <div class="product-item">
+                    <div class="product-item__pic">
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                    </div>
+                    <div class="product-item__text">
+                        <h5>{{ product.name }}</h5>
+                        <p>{{ product.description|truncatewords:20 }}</p>
+                        <span class="product-price">${{ product.price }}</span>
+                        <span class="product-color">{{ product.color }}</span>
+
+                        {% if product.vendor %}
+                            <p>Sold by: <strong>{{ product.vendor.title }}</strong></p>
+                        {% endif %}
+                        
+                        <!-- Button for the product details page -->
+                        <a href="{% url 'core:pages1' product.id %}" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No products available in this category.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

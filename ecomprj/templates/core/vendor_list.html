@@ -1,0 +1,112 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block content %}
+<body>
+    <style>
+        /* Container styling */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 40px;
+    font-size: 2.5em;
+}
+
+/* Vendor list container */
+.vendor-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+/* Individual vendor item */
+.vendor-item {
+    width: calc(33.333% - 20px); /* Three items per row */
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+/* Vendor info styling */
+.vendor-info h2 {
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.vendor-info p {
+    font-size: 1em;
+    color: #555;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.vendor-info a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* Hover effect for vendor cards */
+.vendor-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+@media screen and (max-width: 768px) {
+    .vendor-item {
+        width: calc(50% - 20px); /* Two items per row for tablet */
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .vendor-item {
+        width: 100%; /* One item per row for mobile */
+    }
+}
+
+    </style>
+    <div class="container">
+        <h1>Vendor List</h1>
+<!-- vendor_list.html -->
+<div class="vendor-list">
+    {% for vendor in vendors %}
+    <div class="vendor-item">
+        <div class="vendor-info">
+            <!-- Vendor image -->
+            <img src="{{ vendor.image.url }}" 
+            
+            alt="Vendor" width="100" height="100">
+            
+            <!-- Vendor Name and Description -->
+              <p>Since {{ vendor.date|date:"Y" }}</p>
+            <h2>{{ vendor.name }}</h2>
+            <p>{{ vendor.description }}</p>
+            <a href="mailto:{{ vendor.email }}">Contact: {{ vendor.email }}</a>
+
+            <!-- Number of products in the vendor's store -->
+            <p>Number of Products: {{ vendor.products.all.count }}</p>
+           
+            <!-- Visit Store Button -->
+           <a href="{% url 'core:vendor_products' vendor.vid %}" class="btn btn-primary">Visit Store</a>
+
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}
