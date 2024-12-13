@@ -17,7 +17,7 @@
                     </div>
                     <div class="product-item__text">
                         <h5>{{ product.name }}</h5>
-                        <p>{{ product.description|truncatewords:20 }}</p>
+                        <p>{{ product.description|safe }}</p>
                         <span class="product-price">${{ product.price }}</span>
                         <span class="product-color">{{ product.color }}</span>
 

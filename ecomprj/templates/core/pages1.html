@@ -111,7 +111,12 @@
                     <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab" aria-selected="true">Product Description</a></li>
                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab" aria-selected="false">Additional Information</a></li>
                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab" aria-selected="false">Vendor</a></li>
-                    <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabs-4" role="tab" aria-selected="false">Reviews <span>(1)</span></a></li>
+                   <li class="nav-item">
+  <a class="nav-link" data-toggle="tab" href="#tabs-4" role="tab" aria-selected="false">
+    Reviews <span>{{ reviews.count }}</span>
+  </a>
+</li>
+
                 </ul>
 
                 <!-- Tab Content -->
@@ -123,10 +128,10 @@
                         <p>Here you can add any additional information such as specifications, ingredients, etc.</p>
                     </div>
                     <div class="tab-pane fade" id="tabs-3" role="tabpanel">
-                        <p><b>Vendor:</b> {{ product.vendor.title }}</p>
+                        <p><b>Vendor:</b> {{ product.vendor.title|safe }}</p>
                         <p><b>Shipping:</b> {{ product.shipping }}</p>
                         <p><b>Weight:</b> {{ product.weight }} kg</p>
-                        <p><b>Description:</b> {{ product.description }}</p>
+                        <p><b>Description:</b> {{ product.description|safe}}</p>
                         <a href="{% url 'core:vendor_products' vid=product.vendor.id %}">
                             <img src="{{ product.vendor.image.url }}" alt="{{ product.vendor.title }}" width="100" height="100">
                         </a>
@@ -136,15 +141,18 @@
 
                     <div class="tab-pane fade" id="tabs-4" role="tabpanel">
                         <p>Customer Reviews</p>
-                        {% for r in review %}
-                        <div class="review">
-                            <div class="review__item">
-                                <h6>{{ r.user.username|title }}</h6>
-                                <p>{{ r.date|date:"F j, Y" }}</p>
-                                <p>{{ r.review }}</p>
-                                <p>Rating: {{ r.rating }}</p>
-                            </div>
-                        </div>
+                        
+                       {% for r in review %}
+<div class="review">
+    <div class="review__item">
+        <h6>{{ r.user.username|title }}</h6>
+        <p>{{ r.date|date:"F j, Y" }}</p>
+        <p>{{ r.review }}</p>
+        <p>Rating: {{ r.rating }}</p>
+    </div>
+</div>
+
+
                         {% endfor %}
                       <div class="form hide-comment-form">
     <form id="commentForm" action="{% url 'core:add_review' pid=product.id %}" method="POST">

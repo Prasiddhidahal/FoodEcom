@@ -7,6 +7,7 @@ from django.core.paginator import Paginator
 from taggit.models import Tag
 from django.db.models import Avg
 from ecomprj.forms import ProductReviewForm
+from django.contrib.auth.models import AnonymousUser
 def index(request):
     products=Product.objects.filter(product_status="published")
     categories = Category.objects.all()
@@ -121,6 +122,7 @@ def vendor_products(request, vid):
 
 
 def pages1(request, pid):
+    # Fetch the product by its ID
     product = get_object_or_404(Product, id=pid)
 
     # Fetch related products from the same category, excluding the current product
@@ -129,29 +131,36 @@ def pages1(request, pid):
         product_status="published"
     ).exclude(id=pid)[:4]  # Limit to 4 related products
 
+    # Fetch product images
     products_images = product.products_images.all()
-    address = Address.objects.filter(user=request.user)
+
+    # Initialize the address variable
+    address = None
+    if request.user.is_authenticated:
+        # Fetch the address for the authenticated user, or None if not found
+        address = Address.objects.filter(user=request.user).first()
+
+    # Fetch product reviews
     review = ProductReview.objects.filter(product=product)
 
-    # Get the average rating and handle the case when there are no reviews
-    average_rating = ProductReview.objects.filter(product=product).aggregate(Avg('rating'))['rating__avg']
-    review_form=ProductReviewForm()
-    # Set a default value of 0 if there are no reviews
-    if average_rating is None:
-        average_rating = 0
+    # Calculate the average rating, defaulting to 0 if there are no reviews
+    average_rating = ProductReview.objects.filter(product=product).aggregate(Avg('rating'))['rating__avg'] or 0
 
-    # Create a star range for 1 to 5 stars
+    # Create a star range for display purposes (1 to 5 stars)
     star_range = [1, 2, 3, 4, 5]
 
+    # Prepare the context for rendering the template
     context = {
-        'review_form': review_form,
+        'review_form': ProductReviewForm(),
         'product': product,
         'review': review,
         'related_products': related_products,
         'products_images': products_images,
         'average_rating': average_rating,
         'star_range': star_range,  # Pass the range to the template
+        'address': address  # Pass the user's address if available
     }
+
     return render(request, 'core/pages1.html', context)
 
 def tag_list(request, tag_slug=None):

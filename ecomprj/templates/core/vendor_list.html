@@ -90,7 +90,7 @@ h1 {
             <!-- Vendor Name and Description -->
               <p>Since {{ vendor.date|date:"Y" }}</p>
             <h2>{{ vendor.name }}</h2>
-            <p>{{ vendor.description }}</p>
+            <p>{{ vendor.description|safe }}</p>
             <a href="mailto:{{ vendor.email }}">Contact: {{ vendor.email }}</a>
 
             <!-- Number of products in the vendor's store -->
