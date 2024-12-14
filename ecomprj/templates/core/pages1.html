@@ -139,38 +139,38 @@
                         <p><b>Address:</b> {{ product.vendor.address }}</p>
                     </div>
 
-                    <div class="tab-pane fade" id="tabs-4" role="tabpanel">
-                        <p>Customer Reviews</p>
-                        
-                       {% for r in review %}
-<div class="review">
-    <div class="review__item">
-        <h6>{{ r.user.username|title }}</h6>
-        <p>{{ r.date|date:"F j, Y" }}</p>
-        <p>{{ r.review }}</p>
-        <p>Rating: {{ r.rating }}</p>
+                    <!-- Reviews Section -->
+<div class="tab-pane fade" id="tabs-4" role="tabpanel">
+    <p>Customer Reviews</p>
+
+    {% for r in review %}
+    <div class="review">
+        <div class="review__item">
+            <h6>{{ r.user.username|title }}</h6>
+            <p>{{ r.date|date:"F j, Y" }}</p>
+            <p>{{ r.review }}</p>
+            <p>Rating: {{ r.rating }}</p>
+        </div>
     </div>
+    {% endfor %}
+
+    <!-- Display review form only for authenticated users -->
+    {% if user.is_authenticated %}
+    <div class="form hide-comment-form">
+        <form id="commentForm" action="{% url 'core:add_review' pid=product.id %}" method="POST">
+            {% csrf_token %}
+            <textarea name="review" required placeholder="Write your review here"></textarea>
+            <input type="number" name="rating" min="1" max="5" required placeholder="Rating (1-5)">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    {% else %}
+    <div>
+        <p>You need to <a href="{% url 'userauth:login' %}">login</a> or <a href="{% url 'userauth:register' %}">register</a> to submit a review.</p>
+    </div>
+    {% endif %}
 </div>
 
-
-                        {% endfor %}
-                      <div class="form hide-comment-form">
-    <form id="commentForm" action="{% url 'core:add_review' pid=product.id %}" method="POST">
-        {% csrf_token %}
-        <textarea name="review" required placeholder="Write your review here"></textarea>
-        <input type="number" name="rating" min="1" max="5" required placeholder="Rating (1-5)">
-        <button type="submit">Submit</button>
-    </form>
-</div>
-
-
-                                {% comment %} <div class="form-group">
-                                    <label for="rating">{{ review_form.rating }}</label>
-                                    <input type="number" class="form-control" id="rating" name="rating" min="1" max="5">
-                                </div>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                            </form> {% endcomment %}
-                        </div>
                     </div>
                 </div>
             </div>

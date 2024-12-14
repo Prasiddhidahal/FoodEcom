@@ -1,70 +1,44 @@
-$(document).ready(function () {
-  // Quantity increment/decrement
-  $(".pro-qty").on("click", ".qtybtn", function () {
-    var $button = $(this);
-    var oldValue = $button.parent().find("input").val();
-    var newVal = 1;
+$("#commentForm").submit(function (e) {
+  e.preventDefault(); // Prevent the default form submission
 
-    if ($button.hasClass("inc")) {
-      newVal = parseFloat(oldValue) + 1;
-    } else {
-      if (oldValue > 1) {
-        newVal = parseFloat(oldValue) - 1;
-      } else {
-        newVal = 1;
-      }
-    }
-    $button.parent().find("input").val(newVal);
-  });
-
-  // Image slider for the product images
-  $(".product__details__pic__slider").owlCarousel({
-    loop: true,
-    margin: 10,
-    nav: true,
-    items: 4,
-    autoplay: true,
-    autoplayTimeout: 3000,
-    autoplayHoverPause: true,
-  });
-
-  // Zoom image on click (optional)
-  $(".product__details__pic__slider img").on("click", function () {
-    var imgSrc = $(this).data("imgbigurl");
-    $(".product__details__pic__item--large").attr("src", imgSrc);
-  });
-
-  // Handle review submission with AJAX
-  $("#reviewForm").on("submit", function (e) {
-    e.preventDefault(); // Prevent form from submitting traditionally
-
-    var formData = $(this).serialize(); // Serialize the form data
-
-    $.ajax({
-      url: $(this).attr("action"), // The URL to submit to (your backend URL)
-      type: "POST",
-      data: formData,
-      success: function (response) {
-        // After successful submission, fetch updated reviews
-        fetchReviews();
-      },
-      error: function (xhr, status, error) {
-        console.error("Error submitting review:", error);
-      },
-    });
-  });
-
-  // Function to fetch updated reviews and update the review section
-  function fetchReviews() {
-    $.ajax({
-      url: "/path-to-fetch-reviews/", // Replace with your actual endpoint
-      type: "GET",
-      success: function (data) {
-        $("#reviewSection").html(data); // Update the reviews section with new data
-      },
-      error: function (xhr, status, error) {
-        console.error("Error fetching reviews:", error);
-      },
-    });
+  // Check if the user is authenticated (optional check, handled by backend too)
+  if (!isUserAuthenticated) {
+    // Redirect to login or registration page if the user is not logged in
+    window.location.href = "{% url 'userauth:login' %}";
+    return;
   }
+
+  $.ajax({
+    data: $(this).serialize(), // Serialize the form data
+    method: $(this).attr("method"), // Use the form's method (POST)
+    url: $(this).attr("action"), // Use the form's action attribute (URL to send data to)
+    success: function (response) {
+      if (response.bool) {
+        // Display the review and average rating
+        $(".reviews-list").append(`
+                    <div class="review-item">
+                        <h6>${response.review.user}</h6>
+                        <p>Rating: ${response.review.rating}</p>
+                        <p>${response.review.review}</p>
+                    </div>
+                `);
+
+        // Update the average rating
+        $(".average-rating").text(
+          `Average Rating: ${response.average_reviews}`
+        );
+
+        // Hide the form after successful submission
+        $(".hide-comment-form").hide();
+
+        console.log("Review submitted successfully");
+      } else {
+        alert(response.message); // Show error message
+      }
+    },
+    error: function (xhr, status, error) {
+      console.log("Error: " + error);
+      alert("You cannot review this product more than once");
+    },
+  });
 });

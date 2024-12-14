@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from taggit.models import Tag
 from django.db.models import Avg
 from ecomprj.forms import ProductReviewForm
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.decorators import login_required
 def index(request):
     products=Product.objects.filter(product_status="published")
     categories = Category.objects.all()
