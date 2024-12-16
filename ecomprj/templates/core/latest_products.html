@@ -1,0 +1,26 @@
+<section class="latest-product spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="latest-product__text">
+                    <h4>Latest Products</h4>
+                    <div class="latest-product__slider owl-carousel">
+                        {% for p in latest_products %}
+                            <div class="latest-product__slider__item">
+                                <a href="#" class="latest-product__item">
+                                    <div class="latest-product__item__pic">
+                                        <img src="{{ p.image.url }}" alt="{{ p.title }}">
+                                    </div>
+                                    <div class="latest-product__item__text">
+                                        <h6>{{ p.title }}</h6>
+                                        <span>${{ p.price }}</span>
+                                    </div>
+                                </a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

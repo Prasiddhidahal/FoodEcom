@@ -1,0 +1,29 @@
+{% extends 'partials/base.html' %}  <!-- Extending your base template -->
+
+{% block content %}
+<div class="container">
+    <h2>Search Results for "{{ request.GET.q }}"</h2>
+
+    {% if products %}
+        <p>We found {{ products|length }} product{{ products|length|pluralize }} matching your search.</p>
+
+        <div class="product-list">
+            {% for product in products %}
+                <div class="product-item">
+                    <div class="product-image">
+                        <img src="{{ product.image.url }}" alt="{{ product.title }}" width="200px" height="200px">
+                    </div>
+                    <div class="product-details">
+                        <h3>{{ product.title }}</h3>
+                        <p>{{ product.description|truncatewords:30 }}</p>
+                        <p><strong>Price:</strong> ${{ product.price }}</p>
+                        <a href="{% url 'core:pages1' product.id %}">View Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No products found matching your search query.</p>
+    {% endif %}
+</div>
+{% endblock %}

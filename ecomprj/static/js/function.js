@@ -1,44 +1,96 @@
-$("#commentForm").submit(function (e) {
-  e.preventDefault(); // Prevent the default form submission
+$(document).ready(function () {
+  $("#reviewForm").submit(function (e) {
+    e.preventDefault();
+    $.ajax({
+      data: $(this).serialize(),
+      method: $(this).attr("method"),
+      url: $(this).attr("action"),
+      dataType: "json",
+      success: function (response) {
+        console.log("Saved");
+        if (response.bool == true) {
+          $("#review-res").html("Review Added Successfully.");
+          $("#hide_review_form").hide();
 
-  // Check if the user is authenticated (optional check, handled by backend too)
-  if (!isUserAuthenticated) {
-    // Redirect to login or registration page if the user is not logged in
-    window.location.href = "{% url 'userauth:login' %}";
-    return;
-  }
+          let _html = '<div class="review-item">';
+          _html += '<div class="review-left">';
+          _html +=
+            '<img src="' +
+            response.product +
+            '" alt="' +
+            response.context.user +
+            '" class="user-photo">';
+          _html += "</div>";
+          _html += '<div class="review-middle">';
+          _html += ' <h4 class="user-name">' + response.context.user + "</h4>";
+          _html += '<div class="star-rating">';
+          for (let i = 1; i <= 5; i++) {
+            if (i <= response.context.rating) {
+              _html += '<span class="star">&#9733;</span>';
+            } else {
+              _html += '<span class="star empty">&#9733;</span> ';
+            }
+          }
+          _html += " </div>";
+          _html += '<div class="review-content">';
+          _html += " <p>" + response.context.review + "</p>";
+          _html += "</div>";
+          _html += " </div>";
+          _html += ' <div class="review-right">';
+          _html +=
+            ' <small class="review-time">' + response.context.date + "</small>";
+          _html += " </div>";
+          _html += " </div>";
 
-  $.ajax({
-    data: $(this).serialize(), // Serialize the form data
-    method: $(this).attr("method"), // Use the form's method (POST)
-    url: $(this).attr("action"), // Use the form's action attribute (URL to send data to)
-    success: function (response) {
-      if (response.bool) {
-        // Display the review and average rating
-        $(".reviews-list").append(`
-                    <div class="review-item">
-                        <h6>${response.review.user}</h6>
-                        <p>Rating: ${response.review.rating}</p>
-                        <p>${response.review.review}</p>
-                    </div>
-                `);
-
-        // Update the average rating
-        $(".average-rating").text(
-          `Average Rating: ${response.average_reviews}`
-        );
-
-        // Hide the form after successful submission
-        $(".hide-comment-form").hide();
-
-        console.log("Review submitted successfully");
-      } else {
-        alert(response.message); // Show error message
-      }
-    },
-    error: function (xhr, status, error) {
-      console.log("Error: " + error);
-      alert("You cannot review this product more than once");
-    },
+          $(".reviews-list").prepend(_html);
+        }
+      },
+      error: function (xhr, status, error) {
+        console.log(xhr);
+        console.log(status);
+        console.log(error);
+      },
+    });
   });
 });
+
+$(document).ready(function () {
+    $(".filter-checkbox,#price_filter_btn").on("click",()=>{
+        console.log("clicked");
+        let filter_object={}
+        let min_price= $("#minamount").val()
+        let max_price= $("#maxamount").val()
+        filter_object.min_price=min_price;
+        filter_object.max_price=max_price;
+        $(".filter-checkbox").each(function(){
+            let filter_value = $(this).val()
+            let filter_key = $(this).data("filter")
+
+            // console.log("filter value",filter_value);
+            // console.log("filter key",filter_key);
+            filter_object[filter_key]=Array.from(document.querySelectorAll('input[data-filter='+ filter_key + ']:checked')).map(function(element){
+                return element.value
+            })
+
+            // console.log(filter_object);
+            $.ajax({
+                url:'/filter-product',
+                data: filter_object,
+                dataType: 'json',
+                beforeSend: function(){
+                    console.log('Sending data');
+                },
+                success:function(response) {
+
+                    $("#filtered_products").html(response.data)
+                },
+                error:function(xhr,status,error){
+                    console.log(xhr);
+                    console.log(status);
+                    console.log(error);
+                }
+
+            })
+        })
+    })
+  })

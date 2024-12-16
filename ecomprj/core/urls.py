@@ -23,7 +23,10 @@ urlpatterns = [
     path('vendor_products/<str:vid>/', views.vendor_products, name='vendor_products'),
     path('shop-details/<str:pid>/', views.pages1, name='pages1'),
     path('products/tags/<slug:tag_slug>/', views.tag_list, name='tag_list'),
-    path('add_review/<str:pid>/', views.add_review, name='add_review'),
+    path('add_review/<int:pid>/', views.add_review, name='add_review'),
+    path('search/', views.search_products, name='search'),
+    path('filter-product/', views.filter_product, name='filter-product'),
+    
 
   # Tags page
   # Product detail page with product id

@@ -25,11 +25,11 @@ ORDER_STATUS_CHOICES = [
     ('delivered', 'Delivered')
 ]
 RATING_CHOICES = [
-    (1, '★☆☆☆☆'),
-    (2, '★★☆☆☆'),
-    (3, '★★★☆☆'),
-    (4, '★★★★☆'),
-    (5, '★★★★★'),
+    (1, '1 - Poor'),
+    (2, '2 - Fair'),
+    (3, '3 - Good'),
+    (4, '4 - Very Good'),
+    (5, '5 - Excellent')
 ]
 
 # Helper function to generate upload path
@@ -114,6 +114,7 @@ class Product(models.Model):
     life=models.IntegerField(default=30)
     shipping = models.CharField(max_length=100, default="Free Shipping")
     
+    
     class Meta:
         verbose_name_plural = "Products"     
 
@@ -189,8 +190,6 @@ class ProductReview(models.Model):
 
     def __str__(self):
         return self.product.title if self.product else "Product Review"
-
-
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
