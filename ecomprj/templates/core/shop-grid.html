@@ -2,93 +2,96 @@
 {% load static %}
 {% block content %}
 
-    <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-section set-bg" data-setbg="{% static 'img/breadcrumb.jpg' %}">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="breadcrumb__text">
-                        <h2>Organi Shop</h2>
-                        <div class="breadcrumb__option">
-                            <a href="{% url 'core:index' %}">Home</a>
-                            <span>Shop</span>
-                        </div>
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-section set-bg" data-setbg="{% static 'img/breadcrumb.jpg' %}">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="breadcrumb__text">
+                    <h2>Organi Shop</h2>
+                    <div class="breadcrumb__option">
+                        <a href="{% url 'core:index' %}">Home</a>
+                        <span>Shop</span>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- Breadcrumb Section End -->
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
 
-    <!-- Product Section Begin -->
-    <section class="product spad">
-        <div class="container mb-30 mt-30">
-            <div class="row">
-                <div class="col-lg-12">
-                    <a class="shop-filter-toggle" href="#">
-                        <span class="fi-rs-filter mr-5"></span>
-                        <h4>Filter</h4>
-                        <i class="fi-rs-angle-small-down angle-down"></i>
-                        <i class="fi-rs-angle-small-up angle-up"></i>
-                    </a>
-                </div>
-            </div>
+<div class="container mt-4">
+    <div class="filter-box d-flex justify-content-between flex-wrap">
+        <!-- Categories Box -->
+        <div class="filter-item box-item">
+            <h4>Categories</h4>
+            <ul class="filter-list">
+                {% for c in categories %}
+                <li>
+                    <input type="checkbox" class="form-check-input filter-checkbox" data-filter="category" name="category" value="{{ c.cid }}">
+                    <img src="{{ c.image.url }}" alt="{{ c.title }}" class="category-small-image">
+                    <a href="{% url 'core:category_product_list' c.cid %}">{{ c.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
 
-        <div class="container">
-            <div class="filter-box d-flex justify-content-between">
-
-                <!-- Categories Box -->
-                <div class="filter-item box-item">
-                    <h4>Categories</h4>
-                    <ul class="filter-list">
-                        {% for c in categories %}
-                        <li>
-                            <input type="checkbox" class="form-check-input filter-checkbox" data-filter="category" name="category" value="{{ c.cid }}">
-                            <img src="{{ c.image.url }}" alt="{{ c.title }}" class="category-small-image">
-                            <a href="{% url 'core:category_product_list' c.cid %}">{{ c.title }}</a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-                <!-- Vendors Box -->
-                <div class="filter-item box-item">
-                    <h4>Vendors</h4>
-                    <div class="vendor-list filter-list">
-                        {% for vendor in vendors %}
-                        <div class="vendor-item">
-                            <input type="checkbox" class="form-check-input filter-checkbox" data-filter="vendor" name="vendor" value="{{ vendor.vid }}">
-                            <img src="{{ vendor.image.url }}" alt="{{ vendor.title }}" class="category-small-image">
-                            <a href="{% url 'core:vendor_products' vendor.vid %}">{{ vendor.title }}</a>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-
-                <!-- Tags Box -->
-                <div class="filter-item box-item">
-                    <h4>Tags</h4>
-                    <ul class="tags-list filter-list">
-                        {% for tag in tags %}
-                        <li>
-                            <input type="checkbox" class="form-check-input filter-checkbox" data-filter="tag" name="tag" value="{{ tag.slug }}">
-                            <a href="{% url 'core:tag_list' tag_slug=tag.slug %}" class="{% if tag.slug == selected_tag %}active{% endif %}">
-                                {{ tag.name }}
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-
-            </div>
+        <!-- Vendors Box -->
+        <div class="filter-item box-item">
+            <h4>Vendors</h4>
+            <ul class="filter-list">
+                {% for vendor in vendors %}
+                <li>
+                    <input type="checkbox" class="form-check-input filter-checkbox" data-filter="vendor" name="vendor" value="{{ vendor.vid }}">
+                    <img src="{{ vendor.image.url }}" alt="{{ vendor.title }}" class="category-small-image">
+                    <a href="{% url 'core:vendor_products' vendor.vid %}">{{ vendor.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
 
-        <!-- Products List with Checkbox -->
-        <!-- Products List with Checkbox -->
+        <!-- Tags Box -->
+        <div class="filter-item box-item">
+            <h4>Tags</h4>
+            <ul class="filter-list">
+                {% for tag in tags %}
+                <li>
+                    <input type="checkbox" class="form-check-input filter-checkbox" data-filter="tag" name="tag" value="{{ tag.slug }}">
+                    <a href="{% url 'core:tag_list' tag_slug=tag.slug %}">{{ tag.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Price Range Box -->
+        <div class="filter-item box-item">
+            <h4>By Price</h4>
+            <div class="price-filter">
+                <!-- Slider Input -->
+                <input type="range" value="{{ min_max_price.price__min }}" min="{{ min_max_price.price__min }}" max="{{ min_max_price.price__max }}" class="slider-range" id="range" oninput="max_price.value = this.value; document.getElementById('slider-range-value2').innerText = '$' + this.value">
+
+                <div class="d-flex justify-content-between mt-2">
+                    <div class="caption">From: <strong id="slider-range-value1" class="text-brand">${{ min_max_price.price__min }}</strong></div>
+                    <div class="caption">To: <strong id="slider-range-value2" class="text-brand">${{ min_max_price.price__max }}</strong></div>
+                </div>
+
+                <!-- Slider Range (Price Input) -->
+                <input type="number" value="{{ min_max_price.price__min }}" min="{{ min_max_price.price__min }}" max="{{ min_max_price.price__max }}" placeholder="Current Price" id="max_price" onkeyup="range.value = this.value; document.getElementById('slider-range-value2').innerText = '$' + this.value">
+            </div>
+
+            <!-- Filter Button -->
+            <div class="custome-checkbox">
+                <button id="filter-btn" class="btn btn-primary mt-3">
+                    Filter
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Product Section Begin -->
 <section class="product spad">
-    <div class="container">
+    <div class="container mt-4">
         <!-- Heading -->
         <div class="row mb-4">
             <div class="col-lg-12">
@@ -108,7 +111,7 @@
                             -{{ product.discount }}%
                         </div>
                         {% endif %}
-                        <img src="{{ product.image.url }}" alt="{{ product.title}}" style="max-width: 100%; height: auto; border-radius: 10px;">
+                        <img src="{{ product.image.url }}" alt="{{ product.title }}" style="max-width: 100%; height: auto; border-radius: 10px;">
                     </div>
                     <div class="product__item__text text-center mt-2">
                         <h6 style="margin-bottom: 10px;">
@@ -135,52 +138,62 @@
 </section>
 <!-- Product Section End -->
 
+<!-- Custom CSS -->
+<style>
+    .filter-box {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
 
-    </section>
-    <!-- Product Section End -->
+    .box-item {
+        flex: 1 1 22%;
+        border: 1px solid #ddd;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
 
-    <!-- Custom CSS for styling the boxes and layout -->
-    <style>
-        .category-small-image {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            margin-left: 10px;
-        }
+    .category-small-image {
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
 
+    .price-filter {
+        margin-top: 10px;
+    }
+
+    .filter-list {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .filter-list li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
         .box-item {
-            border: 1px solid #ddd;
-            padding: 20px;
-            margin-bottom: 30px;
-            width: 30%;
+            flex: 1 1 100%;
         }
+    }
 
-        .filter-box {
-            gap: 20px;
+    @media (min-width: 768px) and (max-width: 992px) {
+        .box-item {
+            flex: 1 1 45%;
         }
+    }
+</style>
 
-        .filter-list {
-            list-style-type: none;
-            padding-left: 0;
-        }
-
-        .filter-list li {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .filter-item h4 {
-            margin-bottom: 15px;
-        }
-
-        .vendor-list {
-            margin-top: 10px;
-        }
-
-        .product__text h6 {
-            margin: 10px 0;
-        }
-
-    </style>
 {% endblock %}

@@ -1,4 +1,5 @@
-from core.models import Category, Address, Vendor 
+from core.models import Category, Address, Vendor , Product
+from django.db.models import Max, Min
 
 def default(request):
     # Check if the user is authenticated
@@ -9,14 +10,17 @@ def default(request):
         # Retrieve categories (adjust based on your requirement, e.g., active categories)
         categories = Category.objects.all()  # Modify query as needed (e.g., filter based on conditions)
         vendors = Vendor.objects.all()
+        min_max_price = Product.objects.aggregate( Min("price"), Max("price") )
     else:
         address = None  # For anonymous users, set address to None or handle appropriately
         categories = Category.objects.all()  # Assuming categories are available to everyone (authenticated or not)
         vendors = Vendor.objects.all()
+        min_max_price = min_max_price()
     
     # Return the context with both address and categories
     return {
         'address': address,
         'categories': categories,
         'vendors': vendors,
+        'min_max_price': min_max_price
     }
