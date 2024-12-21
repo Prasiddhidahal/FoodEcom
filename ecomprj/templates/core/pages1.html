@@ -41,67 +41,86 @@
             </div>
 
             <!-- Product Information Section -->
-            <div class="col-lg-6 col-md-6">
-                <div class="product__details__text">
-                    <h3>{{ product.title }}</h3>
-                    <div class="product__details__rating">
-                        <h6>Average Rating= {{ average_rating|floatformat }}</h6>
-                    </div>
+           <div class="col-lg-6 col-md-6">
+    <div class="product__details__text">
+        <!-- Product Title -->
+        <h3>{{ product.title }}</h3>
 
-                    <!-- Product Price Section -->
-                    <style>
-                        .old-price { text-decoration: line-through; color: #ff0000; }
-                        .discounted-price { color: #28a745; font-weight: bold; }
-                    </style>
 
-                    {% if product.old_price %}
-                        <div class="product__details__price">
-                            <span class="old-price">${{ product.old_price }}</span>
-                            <span class="discounted-price">${{ product.price }}</span>
-                        </div>
-                    {% else %}
-                        <div class="product__details__price">${{ product.price }}</div>
-                    {% endif %}
+        <!-- Average Rating -->
+        <div class="product__details__rating">
+            <h6>Average Rating = {{ average_rating|floatformat }}</h6>
+        </div>
 
-                    <p>{{ product.description|safe }}</p>
+        <!-- Product Price Section -->
+        <style>
+            .old-price { text-decoration: line-through; color: #ff0000; }
+            .discounted-price { color: #28a745; font-weight: bold; }
+        </style>
 
-                    <!-- Quantity Selection and Add to Cart -->
-                    <div class="product__details__quantity">
-                        <div class="quantity">
-                            <div class="pro-qty">
-                                <input type="text" value="1">
-                            </div>
-                        </div>
-                    </div>
-                    <a href="#" class="primary-btn">ADD TO CART</a>
-                    <a href="#" class="heart-icon"><span class="icon_heart_alt"></span></a>
+        {% if product.old_price %}
+            <div class="product__details__price">
+               <span>$</span> <span class="old-price">{{ product.old_price }}</span>
+              <span>$</span>  <span class="current-product-price">{{ product.price }}</span>
+            </div>
+        {% else %}
+           <span>$</span> <div class="product__details__price">{{ product.price }}</div>
+        {% endif %}
 
-                    <!-- Additional Product Information -->
-                    <ul>
-                        <li><b>Vendor</b> <span>{{ product.vendor.title }}</span></li>
-                        <li><b>Shipping</b> <span>{{ product.shipping }}</span></li>
-                        <li><b>Weight</b> <span>{{ product.weight }}</span></li>
-                        <li><b>Color</b> <span>{{ product.color }}</span></li>
-                        <li><b>Tags:</b>
-                            {% for tag in product.tags.all %}
-                                <a href="{% url 'core:tag_list' tag.slug %}" style="color: blue;">#{{ tag.name }}</a>
-                            {% endfor %}
-                        </li>
-                        <li><b>MFD</b> <span>{{ product.mfd }}</span></li>
-                        <li><b>EXP</b> <span>{{ product.life }} days</span></li>
-                        <li><b>Stock</b> <span>{{ product.stock_quantity }}</span></li>
-                        <li><b>Share on</b>
-                            <div class="share">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa fa-pinterest"></i></a>
-                            </div>
-                        </li>
-                    </ul>
+        <!-- Product Description -->
+        <p>{{ product.description|safe }}</p>
+
+        <!-- Quantity Selection -->
+        <div class="product__details__quantity">
+            <div class="quantity">
+                  <div class="pro-qty">
+                    <input type="text" value="1" id="product-quantity" class="product-quantity-{{ product.id }}">
                 </div>
             </div>
         </div>
+
+        <!-- Add to Cart Button -->
+{% comment %} <input type="hidden" value="1" id="product-quantity" class="product-quantity-{{ product.id }}">  {% endcomment %}
+<input type="hidden" value="{{product.id}}" id="product-id" class="product-id-{{ product.id }}">
+<input type="hidden" value="{{product.pid}}" id="product-pid" class="product-pid-{{ product.id }}">
+<input type="hidden" class = "product-image-{{product.id}}" id="product-image" value="{{ product.image.url }}">
+<input type="hidden" class = "product-price-{{ product.id }}" id="product-price" value="{{ product.price }}">
+<input type="hidden" class = "product-title-{{ product.id }}" id="product-title" value="{{ product.title }}">
+<button class="add-to-cart" data-index="{{ product.id }}">Add to Cart</button>
+
+
+
+        <!-- Wishlist Icon -->
+        <a href="#" class="heart-icon"><span class="icon_heart_alt"></span></a>
+
+        <!-- Additional Product Information -->
+        <ul>
+            <li><b>Vendor</b> <span>{{ product.vendor.title }}</span></li>
+            <li><b>Shipping</b> <span>{{ product.shipping }}</span></li>
+            <li><b>Weight</b> <span>{{ product.weight }}</span></li>
+            <li><b>Color</b> <span>{{ product.color }}</span></li>
+            <li><b>Tags:</b>
+                {% for tag in product.tags.all %}
+                    <a href="{% url 'core:tag_list' tag.slug %}" style="color: blue;">#{{ tag.name }}</a>
+                {% endfor %}
+            </li>
+            <li><b>MFD</b> <span>{{ product.mfd }}</span></li>
+            <li><b>EXP</b> <span>{{ product.life }} days</span></li>
+            <li><b>Stock</b> <span>{{ product.stock_quantity }}</span></li>
+            <li><b>Share on</b>
+                <div class="share">
+                    <a href="#"><i class="fa fa-facebook"></i></a>
+                    <a href="#"><i class="fa fa-twitter"></i></a>
+                    <a href="#"><i class="fa fa-instagram"></i></a>
+                    <a href="#"><i class="fa fa-pinterest"></i></a>
+                </div>
+            </li>
+        </ul>
+
+        <!-- Review Section -->
+    </div>
+</div>
+
 
         <!-- Tabs for Description, Information, Reviews -->
         <div class="col-lg-12">
@@ -146,7 +165,7 @@
     <div class="tab-pane fade" id="tabs-4" role="tabpanel">
     
 
-    {% for r in review %}
+    {% comment %} {% for r in review %}
     <p>Customer Reviews</p>
     <div class="review">
         <div class="review__item">
@@ -179,7 +198,7 @@
             <p>You need to <a href="{% url 'userauth:login' %}">login</a> or <a href="{% url 'userauth:register' %}">register</a> to submit a review.</p>
         </div>
     {% endif %}
-</div>
+</div> {% endcomment %}
 
     </div>
 </section>

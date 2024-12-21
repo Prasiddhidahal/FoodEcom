@@ -10,30 +10,47 @@ from ecomprj.forms import ProductReviewForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.template.loader import render_to_string	
+from django.db.models import Count, Avg
+
 def index(request):
-    products=Product.objects.filter(product_status="published")
+    products = Product.objects.filter(product_status="published")
     categories = Category.objects.all()
-    Vendors = Vendor.objects.all()
+    vendors = Vendor.objects.all()
+    
+    # Latest Products
     latest_products = Product.objects.filter(
         product_status="published", in_stock=True
     ).order_by('-mfd')[:6]
+    
+    # Top Rated Products
     top_rated_products = Product.objects.filter(
-    product_status="published"
-).annotate(
-    average_rating=Avg('reviews__rating')  # Calculate the average rating from related reviews
-).filter(
-    average_rating__isnull=False  # Exclude products with no ratings
-).order_by('-average_rating')[:3]
+        product_status="published"
+    ).annotate(
+        average_rating=Avg('reviews__rating')  # Calculate the average rating from related reviews
+    ).filter(
+        average_rating__isnull=False  # Exclude products with no ratings
+    ).order_by('-average_rating')[:3]
+    
+    # Reviewed Products (Products that have been reviewed)
+    reviewed_products = Product.objects.filter(
+        product_status="published"
+    ).annotate(
+        review_count=Count('reviews')  # Count the number of reviews for each product
+    ).filter(
+        review_count__gt=0  # Only include products with at least 1 review
+    )[:6]  # Limit to 6 products, you can adjust this number
 
-    context={
-        'products':products,
+    context = {
+        'products': products,
         'categories': categories,
-        'vendors': Vendors,
+        'vendors': vendors,
         'latest_products': latest_products,
         'top_rated_products': top_rated_products,
+        'reviewed_products': reviewed_products,  # Add reviewed products to context
     }
 
     return render(request, 'core/index.html', context)
+
 
 def categories(request):
     # Get all categories
@@ -64,14 +81,6 @@ def category_product_list(request, cid):
     }
 
     return render(request, 'core/category_product_list.html', context)
-
-
-def cart(request):
-    categories = Category.objects.all()
-    context = {
-        'categories': categories,
-    }
-    return render(request, 'core/shoping-cart.html', context)
 
 def checkout(request):
     categories = Category.objects.all()
@@ -210,6 +219,7 @@ def tag_list(request, tag_slug=None):
 
 def add_review(request, pid):
     product = get_object_or_404(Product, id=pid)
+    user=request.user
     
     if request.method == 'POST' and request.user.is_authenticated:
         form = ProductReviewForm(request.POST)
@@ -239,6 +249,7 @@ def add_review(request, pid):
         form = ProductReviewForm()
         
     context = {
+        'user': user.username,
         'product': product,
         'review_form': form,
     }
@@ -351,4 +362,82 @@ def filter_product(request):
 
     return JsonResponse({
         "data": data,
+    })
+
+def add_to_cart(request):
+    cart_product = {
+        str(request.GET['id']): {
+            'title': request.GET['title'],
+            'price': float(request.GET['price']),  # Ensure price is a float for calculation
+            'qty': int(request.GET['qty']),        # Ensure quantity is an integer
+            'image': request.GET['image'],
+            'pid': request.GET['pid'],
+        }
+    }
+
+    if 'cart_data_object' in request.session:
+
+        if str(request.GET['id']) in request.session['cart_data_object']:
+            cart_data = request.session['cart_data_object']
+
+            cart_data[str(request.GET['id'])]['qty'] = int(cart_product[str(request.GET['id'])]['qty'])
+            cart_data.update(cart_data)
+            request.session['cart_data_object'] = cart_data 
+        else:
+            cart_data = request.session['cart_data_object']
+            cart_data.update(cart_product)
+            request.session['cart_data_object'] = cart_data
+    else:
+
+        request.session['cart_data_object'] = cart_product
+
+
+    
+
+    return JsonResponse({
+        "data": request.session['cart_data_object'],
+        'totalcartitems': len(request.session['cart_data_object']),
+        
+    })
+
+def cart_view(request):
+    cart_total_amount = 0
+    if 'cart_data_object' in request.session:
+        for product_id, item in request.session ['cart_data_object'].items():
+            cart_total_amount += int(item['qty']) * float(item['price'])
+        return render(request, 'core/shoping-cart.html',{
+            "cart_data": request.session['cart_data_object'],
+            'total_cart_items':len(request.session['cart_data_object']),
+            'cart_total_amount':cart_total_amount, # Total to be shown in the template
+        })
+    else:
+        messages.error(request, 'Your cart is empty')
+        return redirect('core:index')
+
+def remove_from_cart(request):
+    product_id = request.GET['id']
+    
+    if "cart_data_object" in request.session:
+        if product_id in request.session["cart_data_object"]:
+            cart_data = request.session["cart_data_object"]
+            del request.session["cart_data_object"][product_id]
+            request.session["cart_data_object"] = cart_data
+
+    cart_total_amount = 0
+    if 'cart_data_object' in request.session:
+        for product_id, item in request.session['cart_data_object'].items():
+            cart_total_amount += int(item['qty']) * float(item['price'])
+
+    context = {
+        'cart_data': request.session['cart_data_object'],
+        'total_cart_items': len(request.session['cart_data_object']),
+        'cart_total_amount': cart_total_amount,
+    }
+
+    
+    cart_list_html = render_to_string('core/async/cart-list.html', context)
+
+    return JsonResponse({
+        'data': cart_list_html,
+        "totalcartitems": len(request.session['cart_data_object']),
     })

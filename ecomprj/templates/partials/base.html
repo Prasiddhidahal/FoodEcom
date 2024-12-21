@@ -41,7 +41,7 @@
                 <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
                 <li><a href="#"><i class="fa fa-shopping-bag"></i> <span>3</span></a></li>
             </ul>
-            <div class="header__cart__price">item: <span>$150.00</span></div>
+            <div class="header__cart__price">item:<span>$</span> <span>150.00</span></div>
         </div>
         <div class="humberger__menu__widget">
             <div class="header__top__right__language">
@@ -185,14 +185,48 @@
                     </nav>
                 </div>
                 <div class="col-lg-3">
-                    <div class="header__cart">
-                        <ul>
-                            <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
-                            <li><a href="#"><i class="fa fa-shopping-bag"></i> <span>3</span></a></li>
-                        </ul>
-                        <div class="header__cart__price">item: <span>$150.00</span></div>
-                    </div>
-                </div>
+    <div class="header__cart">
+        <ul>
+            <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
+            <div class="header__cart">
+    <ul>
+        
+    </ul>
+   <div class="header__cart">
+    <ul>
+        <li class="cart-icon">
+            <a href="{% url 'core:cart' %}">
+                <i class="fa fa-shopping-bag cart-items-count"></i>
+                <span id="cart-item-count">{{ request.session.cart_data_object|length }}</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="header__cart__price">
+        Items: <span>$</span><span id="cart-total-price">{{ cart_total_amount }}</span>
+    </div>
+
+    <div class="cart-dropdown">
+        {% if request.session.cart_data_object %}
+            <ul class="cart-items-list">
+                {% for item_id, item in request.session.cart_data_object.items %}
+                    <li class="cart-item">
+                        {% comment %} <span class="cart-item-info">{{ item }}</span> {% endcomment %}
+                        <span class="cart-item-info">{{ item.title }} - {{ item.qty }} × <span>$</span>{{ item.price }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="cart-dropdown-footer">
+                <span class="cart-total">Total:<span>$</span> {{ cart_total_amount }}</span>
+            </div>
+        {% else %}
+            <p class="empty-cart-message">Your cart is empty</p>
+        {% endif %}
+    </div>
+</div>
+
+
+
             </div>
             <div class="humberger__open">
                 <i class="fa fa-bars"></i></div>

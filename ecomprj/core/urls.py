@@ -12,7 +12,6 @@ urlpatterns = [
     path('', views.index, name='index'),  # Home page
     path('shop-grid/', views.shop, name='shop'),  # Shop grid page
     # path('shop-details/', views.pages1, name='pages1'),  # Shop details page
-    path('shopping-cart/', views.cart, name='cart'),  # Shopping cart page
     path('checkout/', views.checkout, name='checkout'),  # Checkout page
     path('contact/', views.contact, name='contact'),  # Contact page
     path('blog/', views.blog, name='blog'),  # Blog page
@@ -26,6 +25,9 @@ urlpatterns = [
     path('add_review/<int:pid>/', views.add_review, name='add_review'),
     path('search/', views.search_products, name='search'),
     path('filter-product/', views.filter_product, name='filter-product'),
+    path('add_to_cart/', views.add_to_cart, name='add_to_cart'),
+    path('cart/', views.cart_view, name='cart'),
+    path('remove_from_cart/', views.remove_from_cart, name='remove_from_cart'),
     
 
   # Tags page

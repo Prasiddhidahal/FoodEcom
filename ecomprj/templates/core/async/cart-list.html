@@ -1,13 +1,10 @@
-{% extends "partials/base.html" %}
-{% load static %}
-{% block content %}
 
     <!-- Hero Section Begin -->
     
     <!-- Hero Section End -->
 
     <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-section set-bg" data-setbg="{%static 'img/breadcrumb.jpg'%} ">
+   
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
@@ -84,7 +81,7 @@
     </div>
 </section>
 
-<section class="shoping-cart spad">
+
             <div class="row">
                 <div class="col-lg-12">
                     <div class="shoping__cart__btns">
@@ -114,16 +111,15 @@
         <li>Shipping fee <span>${{ shipping_fee|floatformat:2 }}</span></li> {% endcomment %}
         <li>Total <span>${{ cart_total_amount|floatformat:2 }}</span></li>
     </ul>
-    {% comment %} {%if totalcartitems%} {% endcomment %}
-                        <a href="{% url 'core:checkout' %}" class="primary-btn">PROCEED TO CHECKOUT</a>
-    {% comment %} {%endif%} {% endcomment %}
-    
+    <a href="{% url 'core:checkout'%}" class="primary-btn">PROCEED TO CHECKOUT</a>
+   {% comment %} {%if totalcartitems%}
+    <a href="{% url 'core:checkout'%}" class="primary-btn">PROCEED TO CHECKOUT</a>
+    {%endif%} {% endcomment %}
 </div>
-                    </div>
+</div>
+
                 </div>
             </div>
         </div>
     </section>
     <!-- Shoping Cart Section End -->
-
-{% endblock %}
