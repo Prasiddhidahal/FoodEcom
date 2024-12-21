@@ -441,3 +441,32 @@ def remove_from_cart(request):
         'data': cart_list_html,
         "totalcartitems": len(request.session['cart_data_object']),
     })
+
+def update_from_cart(request):
+    product_id = str(request.GET['id'])
+    product_qty = request.GET['qty']
+    
+    if "cart_data_object" in request.session:
+        if product_id in request.session["cart_data_object"]:
+            cart_data = request.session["cart_data_object"]
+            cart_data[str(request.GET['id'])]['qty'] = product_qty
+            request.session["cart_data_object"] = cart_data
+
+    cart_total_amount = 0
+    if 'cart_data_object' in request.session:
+        for product_id, item in request.session['cart_data_object'].items():
+            cart_total_amount += int(item['qty']) * float(item['price'])
+
+    context = {
+        'cart_data': request.session['cart_data_object'],
+        'total_cart_items': len(request.session['cart_data_object']),
+        'cart_total_amount': cart_total_amount,
+    }
+
+    
+    cart_list_html = render_to_string('core/async/cart-list.html', context)
+
+    return JsonResponse({
+        'data': cart_list_html,
+        "totalcartitems": len(request.session['cart_data_object']),
+    })

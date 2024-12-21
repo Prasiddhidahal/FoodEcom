@@ -55,12 +55,12 @@
         ${{ p.price }}
     </td>
     <td class="shoping__cart__quantity">
-        <div class="quantity">
-            <input type="number" value="{{ p.qty }}" min="1" class="qty-input" data-product="{{ p.product_id }}">
+         <div class="quantity">
+            <input type="number" value="{{ p.qty }}" min="1" class="product-qty-{{p_id}}" data-product="{{ p.product_id }}">
             <!-- Add an icon next to the input field -->
-            <button type="button" class="update-qty-btn refresh-product" data-product="{{ p.product_id }}" data-title="refresh">
-                <i class="fa fa-refresh"></i> <!-- Refresh icon -->
-            </button>
+            <button class="text-body update-product" data-product="{{ p_id }}">
+            <i class="fa fa-refresh"></i> <!-- Trash icon -->
+        </button>
         </div>
     </td>
     <td class="shoping__cart__total">

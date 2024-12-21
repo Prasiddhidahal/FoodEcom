@@ -118,9 +118,7 @@ $(document).ready(function () {
         $("#cart-total-price").text("$" + response.cart_total_amount);
         this_val.html("✅");
       },
-      error: function (error) {
-        console.error("Error adding to cart:", error);
-      },
+      
     });
   });
 
@@ -150,4 +148,32 @@ $(document).ready(function () {
     });
   });
 
+$(document).on("click", ".update-product", function (e) {
+    e.preventDefault();
+
+    let product_id = $(this).attr("data-product");
+    let this_val = $(this);
+    let product_quantity = $(".product-qty-"+ product_id).val();
+    console.log("Product ID:", product_id);
+    console.log("Product qty:", product_quantity);
+
+$.ajax({
+  url: "/update_from_cart/", // Update this with your Django view URL
+
+  data: {
+    "id": product_id,
+    "qty": product_quantity,
+  },
+  dataType: "json",
+  beforeSend: function () {
+    this_val.hide();
+  },
+  success: function (response) {
+    this_val.show();
+    $("#cart-item-count").text(response.totalcartitems);
+    $("#cart-list").html(response.data);
+  },
+});
+    
+  })
 });

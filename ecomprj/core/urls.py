@@ -28,6 +28,7 @@ urlpatterns = [
     path('add_to_cart/', views.add_to_cart, name='add_to_cart'),
     path('cart/', views.cart_view, name='cart'),
     path('remove_from_cart/', views.remove_from_cart, name='remove_from_cart'),
+    path('update_from_cart/', views.update_from_cart, name='update_from_cart'),
     
 
   # Tags page
