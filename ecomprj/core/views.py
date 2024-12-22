@@ -82,12 +82,7 @@ def category_product_list(request, cid):
 
     return render(request, 'core/category_product_list.html', context)
 
-def checkout(request):
-    categories = Category.objects.all()
-    context = {
-        'categories': categories,
-    }
-    return render(request, 'core/checkout.html', context)
+
 
 def contact(request):
     categories = Category.objects.all()
@@ -470,3 +465,14 @@ def update_from_cart(request):
         'data': cart_list_html,
         "totalcartitems": len(request.session['cart_data_object']),
     })
+
+def checkout(request):
+    cart_total_amount = 0
+    if 'cart_data_object' in request.session:
+        for product_id, item in request.session['cart_data_object'].items():
+            cart_total_amount += int(item['qty']) * float(item['price'])
+    return render(request, 'core/checkout.html',{
+            "cart_data": request.session['cart_data_object'],
+            'total_cart_items':len(request.session['cart_data_object']),
+            'cart_total_amount':cart_total_amount, # Total to be shown in the template
+        })

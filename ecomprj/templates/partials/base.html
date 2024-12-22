@@ -1,6 +1,7 @@
-{% load static %}
+
+  {% load static %}
 <!DOCTYPE html>
-<html lang="zxx">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -10,10 +11,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Ogani | Template</title>
 
-    <!-- Google Font -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;900&display=swap" rel="stylesheet">
 
-    <!-- Css Styles -->
+    <!-- CSS Styles -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}" type="text/css">
     <link rel="stylesheet" href="{% static 'css/elegant-icons.css' %}" type="text/css">
@@ -25,12 +26,12 @@
 </head>
 
 <body>
-    <!-- Page Preloder -->
+    <!-- Page Preloader -->
     <div id="preloder">
         <div class="loader"></div>
     </div>
 
-    <!-- Humberger Begin -->
+    <!-- Humberger Menu Begin -->
     <div class="humberger__menu__overlay"></div>
     <div class="humberger__menu__wrapper">
         <div class="humberger__menu__logo">
@@ -41,7 +42,7 @@
                 <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
                 <li><a href="#"><i class="fa fa-shopping-bag"></i> <span>3</span></a></li>
             </ul>
-            <div class="header__cart__price">item:<span>$</span> <span>150.00</span></div>
+            <div class="header__cart__price">Item: <span>$</span> <span>150.00</span></div>
         </div>
         <div class="humberger__menu__widget">
             <div class="header__top__right__language">
@@ -49,15 +50,13 @@
                 <div>English</div>
                 <span class="arrow_carrot-down"></span>
                 <ul>
-                    <li><a href="#">Spanis</a></li>
+                    <li><a href="#">Spanish</a></li>
                     <li><a href="#">English</a></li>
                 </ul>
             </div>
-<div class="header__top__right__auth">
-    <a href="/login/" class="btn btn-primary"><i class="fa fa-user"></i> Login</a>
-</div>
-
-
+            <div class="header__top__right__auth">
+                <a href="/login/" class="btn btn-primary"><i class="fa fa-user"></i> Login</a>
+            </div>
         </div>
         <nav class="humberger__menu__nav mobile-menu">
             <ul>
@@ -66,8 +65,8 @@
                 <li><a href="#">Pages</a>
                     <ul class="header__menu__dropdown">
                         <li><a href="./shop-details.html">Shop Details</a></li>
-                        <li><a href="./shoping-cart.html">Shoping Cart</a></li>
-                        <li><a href="./checkout.html">Check Out</a></li>
+                        <li><a href="./shopping-cart.html">Shopping Cart</a></li>
+                        <li><a href="./checkout.html">Checkout</a></li>
                         <li><a href="./blog-details.html">Blog Details</a></li>
                     </ul>
                 </li>
@@ -85,12 +84,11 @@
         <div class="humberger__menu__contact">
             <ul>
                 <li><i class="fa fa-envelope"></i> hello@colorlib.com</li>
-                <li>Free Shipping for all Order of $99</li>
+                <li>Free Shipping for all orders over $99</li>
             </ul>
-            
         </div>
     </div>
-    <!-- Humberger End -->
+    <!-- Humberger Menu End -->
 
     <!-- Header Section Begin -->
     <header class="header">
@@ -101,7 +99,7 @@
                         <div class="header__top__left">
                             <ul>
                                 <li><i class="fa fa-envelope"></i> hello@colorlib.com</li>
-                                <li>Free Shipping for all Order of $99</li>
+                                <li>Free Shipping for all orders over $99</li>
                             </ul>
                         </div>
                     </div>
@@ -118,20 +116,19 @@
                                 <div>English</div>
                                 <span class="arrow_carrot-down"></span>
                                 <ul>
-                                    <li><a href="#">Spanis</a></li>
+                                    <li><a href="#">Spanish</a></li>
                                     <li><a href="#">English</a></li>
                                 </ul>
                             </div>
-                              <form action="{% url 'core:search' %}" method="get">
-    <input type="text" placeholder="What do you need?" name="q">
-    <button type="submit" class="site-btn">SEARCH</button>
-</form>
+                            <form action="{% url 'core:search' %}" method="get">
+                                <input type="text" placeholder="What do you need?" name="q">
+                                <button type="submit" class="site-btn">SEARCH</button>
+                            </form>
 
-                     <div class="header__top__right__auth">
-    <a href="{% url 'userauth:login' %}"><i class="fa fa-user"></i> Login</a>
-</div>
-
-
+                            <div class="header__top__right__auth">
+                                <a href="{% url 'userauth:login' %}"><i class="fa fa-user"></i> Login</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -146,92 +143,49 @@
                 <div class="col-lg-6">
                     <nav class="header__menu">
                         <ul>
-                            <li class=""><a href="{% url 'core:index' %}">Home</a>
-</li>
+                            <li><a href="{% url 'core:index' %}">Home</a></li>
                             <li><a href="{% url 'core:shop' %}">Shop</a></li>
-  <li>
-    <a href="#">Category </a>
-    <ul class="header__menu__dropdown">
-        
-        {% for c in categories %}
-        <li><a href="{% url 'core:category_product_list' c.cid %}">{{ c.title }}</a></li>
-        {% endfor %}
-        <li><hr></li>
-        <li><a href="{% url 'core:categories' %}">All Categories</a></li>
-    </ul>
-</li>
-
-
-                           <li><a href="#">Pages</a>
-    <ul class="header__menu__dropdown">
-        <!-- Loop through products to show links for each product -->
-        {% comment %} {% for product in products %} {% endcomment %}
-        {% comment %} <li><a href="{% url 'core:pages1' product.id %}">{{product.title}}</a></li> {% endcomment %}
-        {% comment %} {% endfor %} {% endcomment %}
-        {% comment %} {{product}} {% endcomment %}
-        
-        <!-- Other static links -->
-         {% comment %} <li><a href="{% url 'core:vendor_products' vendor.id %}">products</a></li> {% endcomment %}
-        <li><a href="{% url 'core:cart' %}">Shopping Cart</a></li>
-        <li><a href="{% url 'core:checkout' %}">Check Out</a></li>
-        <li><a href="{% url 'core:blog_details' %}">Blog Details</a></li>
-    </ul>
-</li>
-
-<li><a href="{% url 'core:blog'%}">Blog</a></li>
-<li><a href="{% url 'core:contact'%}">Contact</a></li>
-<li><a href="{% url 'core:vendor_list' %}">Vendors</a></li>
-
+                            <li><a href="#">Category</a>
+                                <ul class="header__menu__dropdown">
+                                    {% for c in categories %}
+                                        <li><a href="{% url 'core:category_product_list' c.cid %}">{{ c.title }}</a></li>
+                                    {% endfor %}
+                                    <li><hr></li>
+                                    <li><a href="{% url 'core:categories' %}">All Categories</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#">Pages</a>
+                                <ul class="header__menu__dropdown">
+                                    <li><a href="{% url 'core:cart' %}">Shopping Cart</a></li>
+                                    <li><a href="{% url 'core:checkout' %}">Checkout</a></li>
+                                    <li><a href="{% url 'core:blog_details' %}">Blog Details</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="{% url 'core:blog' %}">Blog</a></li>
+                            <li><a href="{% url 'core:contact' %}">Contact</a></li>
+                            <li><a href="{% url 'core:vendor_list' %}">Vendors</a></li>
+                        </ul>
                     </nav>
                 </div>
                 <div class="col-lg-3">
-    <div class="header__cart">
-        <ul>
-            <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
-            <div class="header__cart">
-    <ul>
-        
-    </ul>
-   <div class="header__cart">
-    <ul>
-        <li class="cart-icon">
-            <a href="{% url 'core:cart' %}">
-                <i class="fa fa-shopping-bag cart-items-count"></i>
-                <span id="cart-item-count">{{ request.session.cart_data_object|length }}</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="header__cart__price">
-        Items: <span>$</span><span id="cart-total-price">{{ cart_total_amount }}</span>
-    </div>
-
-    <div class="cart-dropdown">
-        {% if request.session.cart_data_object %}
-            <ul class="cart-items-list">
-                {% for item_id, item in request.session.cart_data_object.items %}
-                    <li class="cart-item">
-                        {% comment %} <span class="cart-item-info">{{ item }}</span> {% endcomment %}
-                        <span class="cart-item-info">{{ item.title }} - {{ item.qty }} × <span>$</span>{{ item.price }}</span>
-                    </li>
-                {% endfor %}
-            </ul>
-            <div class="cart-dropdown-footer">
-                <span class="cart-total">Total:<span>$</span> {{ cart_total_amount }}</span>
+                    <div class="header__cart">
+                        <ul>
+                            <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
+                            <li><a href="{% url 'core:cart' %}"><i class="fa fa-shopping-bag"></i> <span>3</span></a></li>
+                        </ul>
+                        <div class="header__cart__price">Items: <span>$</span><span id="cart-total-price">{{ cart_total_amount }}</span></div>
+                    </div>
+                    <div class="cart-dropdown-wrap">
+                        <div class="cart-dropdown">
+                            <a href="{% url 'core:cart' %}" class="site-btn">View Cart</a>
+                            <a href="{% url 'core:checkout' %}" class="site-btn">Checkout</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        {% else %}
-            <p class="empty-cart-message">Your cart is empty</p>
-        {% endif %}
-    </div>
-</div>
-
-
-
-            </div>
-            <div class="humberger__open">
-                <i class="fa fa-bars"></i></div>
-
-{% if messages %}
+        </div>
+    </header>  <!-- Header Section End -->
+  {% if messages %}
     <div class="container mt-3">
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -240,55 +194,7 @@
             </div>
         {% endfor %}
     </div>
-{% endif %}
-
-            
-        </div>
-<section class="hero">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3">
-                <div class="hero__categories">
-                    <div class="hero__categories__all">
-                        <i class="fa fa-bars"></i>
-                        <span>All departments</span>
-                    </div>
-                    <ul>
-                        <!-- Loop through categories dynamically -->
-                        {% for category in categories %}
-                        <li>
-                            <a href="{% url 'core:category_product_list' category.cid %}">
-                                {{ category.title }}
-                            </a>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </div>
-        </div> <!-- Close the row div -->
-    </div>
-</section>
-
-
-    <div class="col-lg-9">
-                <div class="hero__search">
-                    <div class="hero__search__form">
-                        <form action="#">
-                           
-                          
-                    </div>
-                    <div class="hero__search__phone">
-                        <div class="hero__search__phone__icon">
-                            <i class="fa fa-phone"></i>
-                        </div>
-                        <div class="hero__search__phone__text">
-                            <h5>+65 11.188.888</h5>
-                            <span>support 24/7 time</span>
-                        </div>
-                    </div>
-                </div>
-    </header> 
-    <!-- Header Section End -->
-         
+{% endif %}       
         {% block content %}
     
         {% endblock %}
