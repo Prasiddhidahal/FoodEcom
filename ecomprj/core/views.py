@@ -11,6 +11,213 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.template.loader import render_to_string	
 from django.db.models import Count, Avg
+import uuid
+import hmac
+import hashlib
+import hmac, hashlib,json,base64,requests
+from django.conf import settings
+
+
+# Function to generate HMAC SHA256 signature
+def genSha256(key, message):
+    key = key.encode('utf-8')
+    message = message.encode('utf-8')
+
+    hmac_sha256 = hmac.new(key, message, hashlib.sha256)
+    digest = hmac_sha256.digest()
+    signature = base64.b64encode(digest).decode('utf-8')
+
+    return signature
+
+
+
+def initiate_khalti(request):
+    url = "https://a.khalti.com/api/v2/epayment/initiate/"
+    return_url = request.POST.get('return_url')
+   
+    
+    amount = request.POST.get('amount') 
+    purchase_order_id = request.POST.get('purchase_order_id')
+    user= request.user
+    payload = json.dumps({
+        "return_url": return_url,
+        "website_url": "http://127.0.0.1:8000/",
+        "amount": amount,
+        "purchase_order_id": purchase_order_id,
+        "purchase_order_name": "test",
+        "customer_info": {
+        "name": user.username,
+        "email": user.email,
+        "phone": "9800000001",
+        # "phone": user.phone_number
+        }
+    })
+    headers = {
+        'Authorization': f'key {settings.KHALTI_SECRET_KEY}',
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    if response.text:
+        try:
+            new_res = response.json()  # This will safely parse JSON
+        except ValueError as e:
+            print("Error parsing JSON:", e)
+            # Handle the error, possibly returning an error response to the user
+    else:
+        print("Empty response:", response.text)
+    # new_res= json.loads(response.text)
+    # dd(new_res)
+    return redirect(new_res['payment_url'])
+    
+
+def khalti_verify(request):
+    url = "https://a.khalti.com/api/v2/epayment/lookup/"
+    pidx= request.GET.get('pidx')
+    headers = {
+        'Authorization': f'key {settings.KHALTI_SECRET_KEY}',
+        'Content-Type': 'application/json',
+    }
+    payload= json.dumps({
+        'pidx':pidx
+    })
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    new_res= json.loads(response.text)
+    
+    # dd(new_res)
+    if new_res['status'] == 'Completed':
+        messages.success(request,"Payment completed successfully.")
+        invoice(request)
+    elif new_res['status'] == 'Pending':
+        messages.warning(request,"Payment is still pending.")
+    elif new_res['status'] == 'Initiated':
+        messages.warning(request,"Payment has been initiated.")
+    elif new_res['status'] == 'Refunded':
+        messages.success(request,"Payment has been refunded.")
+    elif new_res['status'] == 'Partially Refunded':
+        messages.success(request,"Payment has been partially refunded.")
+    elif new_res['status'] == 'Expired':
+        messages.error(request,"Payment link has expired.")
+    elif new_res['status'] == 'User canceled':
+        messages.error(request,"Payment was canceled by the user.")
+    else:
+        messages.error(request,"Unknown payment status.")
+    return redirect("core:index")
+
+    
+
+
+
+
+def verify_esewa(request):
+    if request.method == 'GET':
+        try:
+            data = request.GET.get('data')
+            decoded_data = base64.b64decode(data).decode('utf-8')
+            map_data =json.loads(decoded_data)
+            if map_data.get('status') == "PENDING":
+                messages.warning(request,"The transaction is still pending.")
+            elif map_data.get('status') == "COMPLETE":
+                messages.success(request,"The transaction is complete.")
+                invoice(request)
+            elif map_data.get('status') == "FULL_REFUND":
+                messages.success(request,"The transaction has been fully refunded.")
+            elif map_data.get('status') == "PARTIAL_REFUND":
+                messages.success(request,"The transaction has been partially refunded.")
+            elif map_data.get('status') == "AMBIGUOUS":
+                messages.warning(request,"The transaction status is ambiguous. Please contact support.")
+            elif map_data.get('status') == "NOT_FOUND":
+                messages.error(request,"The transaction was not found.")
+            elif map_data.get('status') == "CANCELED":
+                messages.error(request,"The transaction has been canceled.")
+            elif map_data.get('status') == "Service is currently unavailable":
+                messages.error(request,"The service is currently unavailable. Please try again later.")
+            else:
+                messages.error(request,"Unknown status.")
+            return redirect("core:index")
+        except Exception as e:
+            print(e)
+            messages.error(request,"The service is currently down please try again later or contact our representatives")
+            return redirect("core:index")
+@login_required
+def checkout_view(request):
+
+    cart_total_amount=0
+    if 'cart_data_obj' in request.session:
+        for p_id, item in request.session['cart_data_obj'].items():
+            cart_total_amount += float(item['price']) * int(item['qty'])
+        
+    if request.method == 'POST':
+        cart_total_amount=0
+        if 'cart_data_obj' in request.session:
+            for p_id, item in request.session['cart_data_obj'].items():
+                cart_total_amount += float(item['price']) * int(item['qty'])
+            order = CartOrder.objects.create(
+                user = request.user,
+                price= cart_total_amount
+
+            )
+            for p_id, item in request.session['cart_data_obj'].items():
+                cart_order_products = CartOrderItems.objects.create(
+                    order = order,
+                    invoice_no = "INVOICE_NO_"+str(order.id),
+                    item=item['title'],
+                    image=item['image'],
+                    qty=item['qty'],
+                    price=item['price'],
+                    total=float(item['qty']) * float(item['price']),
+                    
+
+
+                )
+        pay_type = request.POST.get('pay_type')
+        if pay_type == 'esewa':
+            uid = uuid.uuid4()
+            tax_amount = 0 
+            amount = cart_total_amount
+            total_amount = amount + tax_amount
+            data_to_sign = f"total_amount={total_amount},transaction_uuid={uid},product_code={settings.ESEWA_PRODUCT_CODE}"
+            result= genSha256(settings.ESEWA_SECRET_KEY, data_to_sign)
+            
+            return render(request, 'esewa.html',{
+                'uid':uid,
+                'amount': amount ,
+                'tax_amount': tax_amount ,
+                'total_amount': total_amount ,
+                'product_code': settings.ESEWA_PRODUCT_CODE ,
+                'signature' : result,
+            }
+            )
+
+            
+        elif pay_type == 'khalti':
+            amount = cart_total_amount
+            amount_in_paisa = amount * 100
+            return render(request, 'khalti.html',{
+                'uid':uuid.uuid4(),
+                'amount': amount_in_paisa ,
+            }
+            )            
+        if pay_type == 'custom_qr':
+            # initiate_esewa(request)
+            pass
+    
+    try:
+        active_address= Address.objects.get(user=request.user,status=True)
+
+    except:
+        messages.warning(request,'Multiple address default, only one should be default')
+    return render(request,'checkout_view.html',{
+            "cart_data": request.session['cart_data_obj'],
+            'total_cart_items':len(request.session['cart_data_obj']),
+            'cart_total_amount':cart_total_amount,
+            'active_address':active_address,
+            })
+
+
+
+
 
 def index(request):
     products = Product.objects.filter(product_status="published")
@@ -471,8 +678,90 @@ def checkout(request):
     if 'cart_data_object' in request.session:
         for product_id, item in request.session['cart_data_object'].items():
             cart_total_amount += int(item['qty']) * float(item['price'])
-    return render(request, 'core/checkout.html',{
+        
+    if request.method == 'POST':
+        cart_total_amount=0
+        if 'cart_data_object' in request.session:
+         for product_id, item in request.session['cart_data_object'].items():
+            cart_total_amount += int(item['qty']) * float(item['price'])
+            order = CartOrder.objects.create(
+                user = request.user,
+                price= cart_total_amount
+
+            )
+            for product_id, item in request.session['cart_data_object'].items():
+                cart_order_products = CartOrderItems.objects.create(
+                    order = order,
+                    invoice_no = "INVOICE_NO_"+str(order.id),
+                    item=item['title'],
+                    image=item['image'],
+                    qty=item['qty'],
+                    price=item['price'],
+                    total=float(item['qty']) * float(item['price']),
+                    
+
+
+                )
+        pay_type = request.POST.get('pay_type')
+        if pay_type == 'esewa':
+            uid = uuid.uuid4()
+            tax_amount = 0 
+            amount = cart_total_amount
+            total_amount = amount + tax_amount
+            data_to_sign = f"total_amount={total_amount},transaction_uuid={uid},product_code={settings.ESEWA_PRODUCT_CODE}"
+            result= genSha256(settings.ESEWA_SECRET_KEY, data_to_sign)
+            
+            return render(request, 'core/esewa-request.html',{
+                'uid':uid,
+                'amount': amount ,
+                'tax_amount': tax_amount ,
+                'total_amount': total_amount ,
+                'product_code': settings.ESEWA_PRODUCT_CODE ,
+                'signature' : result,
+            }
+            )
+
+            
+        elif pay_type == 'khalti':
+            amount = cart_total_amount
+            amount_in_paisa = amount * 100
+            return render(request, 'core/khalti.html',{
+                'uid':uuid.uuid4(),
+                'amount': amount_in_paisa ,
+            }
+            )            
+        if pay_type == 'custom_qr':
+            # initiate_esewa(request)
+            pass
+    
+    try:
+        active_address= Address.objects.get(user=request.user,status=True)
+
+    except:
+        messages.warning(request,'Multiple address default, only one should be default')
+    return render(request,'core/checkout.html',{
             "cart_data": request.session['cart_data_object'],
             'total_cart_items':len(request.session['cart_data_object']),
-            'cart_total_amount':cart_total_amount, # Total to be shown in the template
-        })
+            'cart_total_amount':cart_total_amount,
+            'active_address':active_address,
+            })
+
+
+@login_required
+def invoice(request):
+    cart_total_amount = 0
+    # Safely get cart_data_obj from the session
+    cart_data = request.session.get('cart_data_object', {})
+
+    # Calculate total amount if cart_data exists
+    if cart_data:
+        for product_id, item in request.session['cart_data_object'].items():
+            cart_total_amount += int(item['qty']) * float(item['price'])  
+
+    return render(request, 'core/invoice.html', {
+        "cart_data": request.session['cart_data_object'],
+            'total_cart_items':len(request.session['cart_data_object']),
+            'cart_total_amount':cart_total_amount,
+    })
+
+    

@@ -29,9 +29,12 @@ urlpatterns = [
     path('cart/', views.cart_view, name='cart'),
     path('remove_from_cart/', views.remove_from_cart, name='remove_from_cart'),
     path('update_from_cart/', views.update_from_cart, name='update_from_cart'),
+    path('khalti_verify/', views.khalti_verify,name='khalti_verify'),
+    path('initiate_khalti/', views.initiate_khalti,name='initiate_khalti'),
+    path('verify_esewa/', views.verify_esewa,name='verify_esewa'),
+    path('invoice/', views.invoice,name='invoice'),
     
 
-  # Tags page
-  # Product detail page with product id
+
 
 ]

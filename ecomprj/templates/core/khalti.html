@@ -1,0 +1,25 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Khalti</title>
+    </head>
+    <body>
+            <div class="container" style="display:none">
+<form id="khaltiForm"  action="{% url "core:initiate_khalti" %}" method="post">
+    {% csrf_token %}
+    <input type="text" name="purchase_order_id" value="{{ uid }}">
+    <input type="text" name="amount" value="{{ amount|floatformat }}">
+    <input type="text" name="return_url" value="http://127.0.0.1:8000/khalti_verify/">
+
+</form>
+
+<script>
+    window.onload = function() {
+        document.getElementById('khaltiForm').submit();
+    };
+</script>
+</div>
+    </body>
+    </html>

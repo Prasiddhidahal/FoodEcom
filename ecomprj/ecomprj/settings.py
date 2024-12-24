@@ -144,6 +144,9 @@ JAZZMIN_SETTINGS = {
     # "site_logo": "images/header.png",
 
 }
+KHALTI_SECRET_KEY = "2047c6aaefea4effa0e04eea72dba46c"
+ESEWA_SECRET_KEY = "8gBm/:&EnhH.1/q"
+ESEWA_PRODUCT_CODE = "EPAYTEST"
 
 AUTH_USER_MODEL = 'userauth.User'
 

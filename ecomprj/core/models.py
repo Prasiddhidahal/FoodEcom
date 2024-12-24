@@ -31,6 +31,11 @@ RATING_CHOICES = [
     (4, '4 - Very Good'),
     (5, '5 - Excellent')
 ]
+METHOD=[
+    ('COD','Cash On Delivery'),
+    ('Esewa','Esewa'),
+    ('Khalti','Khalti'),
+]
 
 # Helper function to generate upload path
 def user_directory_path(instance, filename):
@@ -152,6 +157,9 @@ class CartOrder(models.Model):
     paid_status = models.BooleanField(default=False)
     order_date = models.DateTimeField(auto_now_add=True)
     product_status = models.CharField(choices=ORDER_STATUS_CHOICES, max_length=30, default="processing")
+    payment_method = models.CharField(choices=METHOD, max_length=30, default="COD")
+    payment_completed = models.BooleanField(default=False)
+    
 
     class Meta:
         verbose_name_plural = "Cart Orders"
@@ -167,7 +175,7 @@ class CartOrderItems(models.Model):
     qty = models.IntegerField(default=0)
     price = models.DecimalField(max_digits=10, decimal_places=2, default="1.99")
     total = models.DecimalField(max_digits=10, decimal_places=2, default="1.99")
-
+    invoice_no = models.CharField(max_length=255, blank=True, null=True)
     class Meta:
         verbose_name_plural = "Cart Order Items"
 
