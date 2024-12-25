@@ -54,9 +54,17 @@
                     <li><a href="#">English</a></li>
                 </ul>
             </div>
-            <div class="header__top__right__auth">
-                <a href="/login/" class="btn btn-primary"><i class="fa fa-user"></i> Login</a>
-            </div>
+           <div class="header__top__right__auth">
+    {% if request.user.is_authenticated %}
+        <!-- User is logged in, show My Account (Customer Dashboard) and Logout buttons -->
+        <a href="{% url 'core:customer_dashboard' %}" class="btn btn-primary"><i class="fa fa-user"></i> My Account</a>
+        <a href="{% url 'userauth:logout' %}" class="btn btn-primary"><i class="fa fa-sign-out"></i> Logout</a>
+    {% else %}
+        <!-- User is not logged in, show Login and Register buttons -->
+        <a href="{% url 'userauth:login' %}" class="btn btn-primary"><i class="fa fa-user"></i> Login</a>
+        <a href="{% url 'userauth:register' %}" class="btn btn-primary"><i class="fa fa-user-plus"></i> Register</a>
+    {% endif %}
+</div>
         </div>
         <nav class="humberger__menu__nav mobile-menu">
             <ul>
@@ -125,9 +133,17 @@
                                 <button type="submit" class="site-btn">SEARCH</button>
                             </form>
 
-                            <div class="header__top__right__auth">
-                                <a href="{% url 'userauth:login' %}"><i class="fa fa-user"></i> Login</a>
-                            </div>
+                             <div class="header__top__right__auth">
+    {% if request.user.is_authenticated %}
+        <!-- User is logged in, show My Account (Customer Dashboard) and Logout buttons -->
+        <a href="{% url 'core:customer_dashboard' %}" class="btn btn-primary"><i class="fa fa-user"></i> My Account</a>
+        <a href="{% url 'userauth:logout' %}" class="btn btn-primary"><i class="fa fa-sign-out"></i> Logout</a>
+    {% else %}
+        <!-- User is not logged in, show Login and Register buttons -->
+        <a href="{% url 'userauth:login' %}" class="btn btn-primary"><i class="fa fa-user"></i> Login</a>
+        <a href="{% url 'userauth:register' %}" class="btn btn-primary"><i class="fa fa-user-plus"></i> Register</a>
+    {% endif %}
+</div>
                         </div>
                     </div>
                 </div>

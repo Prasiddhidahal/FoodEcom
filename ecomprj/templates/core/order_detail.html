@@ -1,0 +1,44 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Order #{{ order.id }}</h2>
+
+    <h4>Order Details:</h4>
+    <p><strong>Order Date:</strong> {{ order.order_date }}</p>
+    <p><strong>Status:</strong> {{ order.product_status }}</p>
+    <p><strong>Total Price:</strong> ${{ order.price }}</p>
+    <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+
+    <h4>Order Items:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Image</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order_items %}
+                <tr>
+                    <td>{{ item.item }}</td>
+                    <td>{{ item.qty }}</td>
+                    <td>${{ item.price }}</td>
+                    <td>${{ item.total }}</td>
+                    <td><img src="{{ item.image }}"  class="small-product-image"></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <style>
+            .small-product-image {
+                width: 50px;
+                height: 50px;
+            }
+        </style>
+    </table>
+</div>
+{% endblock %}

@@ -29,8 +29,6 @@ def genSha256(key, message):
 
     return signature
 
-
-
 def initiate_khalti(request):
     url = "https://a.khalti.com/api/v2/epayment/initiate/"
     return_url = request.POST.get('return_url')
@@ -70,7 +68,6 @@ def initiate_khalti(request):
     # dd(new_res)
     return redirect(new_res['payment_url'])
     
-
 def khalti_verify(request):
     url = "https://a.khalti.com/api/v2/epayment/lookup/"
     pidx= request.GET.get('pidx')
@@ -88,7 +85,7 @@ def khalti_verify(request):
     # dd(new_res)
     if new_res['status'] == 'Completed':
         messages.success(request,"Payment completed successfully.")
-        invoice(request)
+        return redirect('core:invoice')  # Redirect to the invoice page
     elif new_res['status'] == 'Pending':
         messages.warning(request,"Payment is still pending.")
     elif new_res['status'] == 'Initiated':
@@ -105,11 +102,6 @@ def khalti_verify(request):
         messages.error(request,"Unknown payment status.")
     return redirect("core:index")
 
-    
-
-
-
-
 def verify_esewa(request):
     if request.method == 'GET':
         try:
@@ -119,8 +111,9 @@ def verify_esewa(request):
             if map_data.get('status') == "PENDING":
                 messages.warning(request,"The transaction is still pending.")
             elif map_data.get('status') == "COMPLETE":
-                messages.success(request,"The transaction is complete.")
-                invoice(request)
+               messages.success(request,"The transaction is complete.")
+               return redirect('core:invoice')  # Redirect to the invoice page
+
             elif map_data.get('status') == "FULL_REFUND":
                 messages.success(request,"The transaction has been fully refunded.")
             elif map_data.get('status') == "PARTIAL_REFUND":
@@ -140,84 +133,6 @@ def verify_esewa(request):
             print(e)
             messages.error(request,"The service is currently down please try again later or contact our representatives")
             return redirect("core:index")
-@login_required
-def checkout_view(request):
-
-    cart_total_amount=0
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            cart_total_amount += float(item['price']) * int(item['qty'])
-        
-    if request.method == 'POST':
-        cart_total_amount=0
-        if 'cart_data_obj' in request.session:
-            for p_id, item in request.session['cart_data_obj'].items():
-                cart_total_amount += float(item['price']) * int(item['qty'])
-            order = CartOrder.objects.create(
-                user = request.user,
-                price= cart_total_amount
-
-            )
-            for p_id, item in request.session['cart_data_obj'].items():
-                cart_order_products = CartOrderItems.objects.create(
-                    order = order,
-                    invoice_no = "INVOICE_NO_"+str(order.id),
-                    item=item['title'],
-                    image=item['image'],
-                    qty=item['qty'],
-                    price=item['price'],
-                    total=float(item['qty']) * float(item['price']),
-                    
-
-
-                )
-        pay_type = request.POST.get('pay_type')
-        if pay_type == 'esewa':
-            uid = uuid.uuid4()
-            tax_amount = 0 
-            amount = cart_total_amount
-            total_amount = amount + tax_amount
-            data_to_sign = f"total_amount={total_amount},transaction_uuid={uid},product_code={settings.ESEWA_PRODUCT_CODE}"
-            result= genSha256(settings.ESEWA_SECRET_KEY, data_to_sign)
-            
-            return render(request, 'esewa.html',{
-                'uid':uid,
-                'amount': amount ,
-                'tax_amount': tax_amount ,
-                'total_amount': total_amount ,
-                'product_code': settings.ESEWA_PRODUCT_CODE ,
-                'signature' : result,
-            }
-            )
-
-            
-        elif pay_type == 'khalti':
-            amount = cart_total_amount
-            amount_in_paisa = amount * 100
-            return render(request, 'khalti.html',{
-                'uid':uuid.uuid4(),
-                'amount': amount_in_paisa ,
-            }
-            )            
-        if pay_type == 'custom_qr':
-            # initiate_esewa(request)
-            pass
-    
-    try:
-        active_address= Address.objects.get(user=request.user,status=True)
-
-    except:
-        messages.warning(request,'Multiple address default, only one should be default')
-    return render(request,'checkout_view.html',{
-            "cart_data": request.session['cart_data_obj'],
-            'total_cart_items':len(request.session['cart_data_obj']),
-            'cart_total_amount':cart_total_amount,
-            'active_address':active_address,
-            })
-
-
-
-
 
 def index(request):
     products = Product.objects.filter(product_status="published")
@@ -258,7 +173,6 @@ def index(request):
 
     return render(request, 'core/index.html', context)
 
-
 def categories(request):
     # Get all categories
     products=Product.objects.filter(product_status="published")
@@ -288,8 +202,6 @@ def category_product_list(request, cid):
     }
 
     return render(request, 'core/category_product_list.html', context)
-
-
 
 def contact(request):
     categories = Category.objects.all()
@@ -325,7 +237,6 @@ def vendor_list_view(request):
         'vendors': vendors,
     }
     return render(request, 'core/vendor_list.html', context)
-
 def vendor_products(request, vid):
     # Change 'id' to the correct field, like 'slug' or 'vid'
     vendor = get_object_or_404(Vendor, vid=vid)  # Using 'vid' as the field name
@@ -361,8 +272,6 @@ def shop(request):
         'selected_tag': tag_slug  # Pass selected tag to highlight it
     }
     return render(request, 'core/shop-grid.html', context)
-
-
 
 def pages1(request, pid):
     # Fetch the product by its ID
@@ -675,77 +584,68 @@ def update_from_cart(request):
 
 def checkout(request):
     cart_total_amount = 0
-    if 'cart_data_object' in request.session:
-        for product_id, item in request.session['cart_data_object'].items():
+    cart_data = request.session.get('cart_data_object', {})  # Safely get cart data from session
+
+    if cart_data:
+        for product_id, item in cart_data.items():
             cart_total_amount += int(item['qty']) * float(item['price'])
-        
+
     if request.method == 'POST':
-        cart_total_amount=0
-        if 'cart_data_object' in request.session:
-         for product_id, item in request.session['cart_data_object'].items():
+        cart_total_amount = 0
+        for product_id, item in cart_data.items():
             cart_total_amount += int(item['qty']) * float(item['price'])
             order = CartOrder.objects.create(
-                user = request.user,
-                price= cart_total_amount
-
+                user=request.user,
+                price=cart_total_amount
             )
-            for product_id, item in request.session['cart_data_object'].items():
-                cart_order_products = CartOrderItems.objects.create(
-                    order = order,
-                    invoice_no = "INVOICE_NO_"+str(order.id),
+            for product_id, item in cart_data.items():
+                CartOrderItems.objects.create(
+                    order=order,
+                    invoice_no="INVOICE_NO_" + str(order.id),
                     item=item['title'],
                     image=item['image'],
                     qty=item['qty'],
                     price=item['price'],
                     total=float(item['qty']) * float(item['price']),
-                    
-
-
                 )
+
         pay_type = request.POST.get('pay_type')
         if pay_type == 'esewa':
             uid = uuid.uuid4()
-            tax_amount = 0 
+            tax_amount = 0
             amount = cart_total_amount
             total_amount = amount + tax_amount
             data_to_sign = f"total_amount={total_amount},transaction_uuid={uid},product_code={settings.ESEWA_PRODUCT_CODE}"
-            result= genSha256(settings.ESEWA_SECRET_KEY, data_to_sign)
-            
-            return render(request, 'core/esewa-request.html',{
-                'uid':uid,
-                'amount': amount ,
-                'tax_amount': tax_amount ,
-                'total_amount': total_amount ,
-                'product_code': settings.ESEWA_PRODUCT_CODE ,
-                'signature' : result,
-            }
-            )
+            result = genSha256(settings.ESEWA_SECRET_KEY, data_to_sign)
 
-            
+            return render(request, 'core/esewa-request.html', {
+                'uid': uid,
+                'amount': amount,
+                'tax_amount': tax_amount,
+                'total_amount': total_amount,
+                'product_code': settings.ESEWA_PRODUCT_CODE,
+                'signature': result,
+            })
+
         elif pay_type == 'khalti':
             amount = cart_total_amount
             amount_in_paisa = amount * 100
-            return render(request, 'core/khalti.html',{
-                'uid':uuid.uuid4(),
-                'amount': amount_in_paisa ,
-            }
-            )            
-        if pay_type == 'custom_qr':
-            # initiate_esewa(request)
-            pass
-    
+            return render(request, 'core/khalti.html', {
+                'uid': uuid.uuid4(),
+                'amount': amount_in_paisa,
+            })
+        
     try:
-        active_address= Address.objects.get(user=request.user,status=True)
+         active_address= Address.objects.get(user=request.user,status=True)
 
     except:
-        messages.warning(request,'Multiple address default, only one should be default')
-    return render(request,'core/checkout.html',{
-            "cart_data": request.session['cart_data_object'],
-            'total_cart_items':len(request.session['cart_data_object']),
-            'cart_total_amount':cart_total_amount,
-            'active_address':active_address,
-            })
-
+         messages.warning(request,'Multiple address default, only one should be default')
+    return render(request, 'core/checkout.html', {
+        'cart_data': cart_data,
+        'total_cart_items': len(cart_data),
+        'cart_total_amount': cart_total_amount,
+        'active_address':active_address
+    })
 
 @login_required
 def invoice(request):
@@ -758,10 +658,45 @@ def invoice(request):
         for product_id, item in request.session['cart_data_object'].items():
             cart_total_amount += int(item['qty']) * float(item['price'])  
 
-    return render(request, 'core/invoice.html', {
-        "cart_data": request.session['cart_data_object'],
-            'total_cart_items':len(request.session['cart_data_object']),
-            'cart_total_amount':cart_total_amount,
+    return render(request, "core/invoice.html", {
+        'cart_data': request.session['cart_data_object'],
+        'total_cart_items': len(request.session['cart_data_object']),
+        'cart_total_amount': cart_total_amount,
     })
-
+@login_required
+def order_detail(request, order_id):
+    order = get_object_or_404(CartOrder, id=order_id, user=request.user)
+    order_items = CartOrderItems.objects.filter(order=order)
     
+    context = {
+        'order': order,
+        'order_items': order_items
+    }
+    return render(request, 'core/order_detail.html', context)
+@login_required
+def customer_dashboard(request):
+    order=CartOrder.objects.filter(user=request.user)
+    address= Address.objects.filter(user=request.user)
+    if request.method == 'POST':
+        address = request.POST.get('address')
+        mobile = request.POST.get('mobile')
+        new_address = Address.objects.create(
+            user=request.user,
+            address=address,
+            mobile=mobile,
+            status=True
+        )
+        messages.success(request, 'Address added successfully')
+        return redirect('core:customer_dashboard')
+    context={
+        'orders':order,
+        'address':address
+    }
+    return render(request, 'core/customer_dashboard.html', context)
+
+def make_default_address(request):
+    # pass
+    id = request.GET.get('id')
+    Address.objects.update(status=False)
+    Address.objects.filter(id=id).update(status=True)
+    return JsonResponse({'boolean': True})

@@ -31,6 +31,10 @@ class TagsAdmin(admin.ModelAdmin):
 class CartOrderAdmin(admin.ModelAdmin):
     list_display = ['user', 'price', 'paid_status', 'order_date', 'product_status']
 
+class AddressesAdmin(admin.ModelAdmin):
+    list_editable = ['address', 'status']
+    list_display = ['user', 'address', 'status']
+
 # Register the models with their respective admin classes
 
 admin.site.register(Category, CategoryAdmin)

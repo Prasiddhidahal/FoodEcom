@@ -177,6 +177,34 @@ $.ajax({
     
   })
 
+//make defult address
+$(document).on("click", ".make-default-address", function (e) {
+  e.preventDefault();
+
+  let id = $(this).attr("data-address-id");
+  let this_val = $(this);
+  console.log("Address ID:", id);
+  console.log("Element is:", this_val);
+
+  $.ajax({
+    url:"/make-default-address",
+    data: {
+      'id':id,
+    },
+    dataType:"json",
+    success: function (response){
+      console.log("Addresss made deafult");
+      if (response.success==true) {
+         $(".check").hide(), $(".action_btn").show(),
+         $(".check"+id).show();
+          $(".button" + id).hide();
+         
+      }
+    }
+  })
 
  
+
+});
+
 });

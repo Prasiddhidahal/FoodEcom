@@ -1,0 +1,28 @@
+{% if messages %}
+    {% for message in messages  %}
+        {% if message.tags == "success" %}
+        <div class="alert alert-success">
+            <strong>{{message}}</strong>
+        </div>
+        {% elif message.tags == "warning" %}
+        <div class="alert alert-warning">
+            <strong>{{message}}</strong>
+        </div>
+        {% elif message.tags == "error" %} 
+        <div class="alert alert-danger">
+            <strong>{{message}}</strong>
+        </div>
+        {% elif message.tags == "info" %} 
+        <div class="alert alert-info">
+            <strong>{{message}}</strong>
+        </div>
+       
+        {% endif %}
+        
+    {% endfor %}
+{% endif %}
+<script>
+    setTimeout( () => {
+            $(".alert").alert("close")
+    },3000)
+</script>

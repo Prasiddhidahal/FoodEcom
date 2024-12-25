@@ -171,7 +171,7 @@ class CartOrderItems(models.Model):
     order = models.ForeignKey(CartOrder, on_delete=models.CASCADE)
     product_status = models.CharField(max_length=200)
     item = models.CharField(max_length=200)
-    image = models.ImageField(upload_to="product_images")
+    image = models.CharField(max_length=200)
     qty = models.IntegerField(default=0)
     price = models.DecimalField(max_digits=10, decimal_places=2, default="1.99")
     total = models.DecimalField(max_digits=10, decimal_places=2, default="1.99")
@@ -180,7 +180,7 @@ class CartOrderItems(models.Model):
         verbose_name_plural = "Cart Order Items"
 
     def order_img(self):
-        return mark_safe('<img src="/media/%s" width="50" height="50" />' % self.image)
+        return mark_safe('<img src="/media/" width="50" height="50" />' % self.image)
 
 
 
@@ -212,6 +212,7 @@ class Wishlist(models.Model):
 class Address(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     address = models.TextField(max_length=200)
+    mobile = models.TextField(max_length=10)
     status=models.BooleanField(default=False)
     class Meta:
         verbose_name_plural = "Addresses"

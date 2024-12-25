@@ -1,0 +1,215 @@
+{% extends "partials/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Welcome to your Dashboard, {{ user.username }}!</h2>
+
+    <!-- Tabs navigation -->
+    <ul class="nav nav-tabs" id="dashboardTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="orders-tab" data-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="true">Orders</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="track-orders-tab" data-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false">Track Orders</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="address-tab" data-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="false">Address</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="account-details-tab" data-toggle="tab" href="#account-details" role="tab" aria-controls="account-details" aria-selected="false">Account Details</a>
+        </li>
+    </ul>
+
+    <!-- Tabs content -->
+    <div class="tab-content" id="dashboardTabContent">
+        <!-- Orders Tab -->
+        <div class="tab-pane fade show active" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Your Orders</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Paid</th>
+                                    <th>Total</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for o in orders %}
+    <tr>
+        <td>Invoice_No-{{ o.id }}</td>
+        <td>{{ o.order_date }}</td>
+        <td>{{ o.product_status }}</td>
+        {% if o.paid_status == True%}
+        <td>Paid</td>
+        {% else %}
+        <td>Not Paid</td>
+        {% endif %}
+        <td>{{ o.price }}</td>
+        <td><a href="{% url 'core:order_detail' o.id %}">View</a></td>
+    </tr>
+{% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Track Orders Tab -->
+        <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Orders Tracking</h3>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <input type="text" class="form-control mb-2" placeholder="Enter Order Number">
+                        <button type="submit" class="btn btn-primary">Track Order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Tab -->
+        <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="mb-0">Your Address</h3>
+        </div>
+        <div>
+            <!-- Form to add address and mobile number -->
+            <form method="POST">
+                {% csrf_token %}
+                <input type="text" name="mobile" placeholder="Mobile Number" required>
+                <input type="text" name="address" placeholder="Address" required><br>
+                <button type="submit">Add Address</button>
+            </form>
+        </div>
+        <div class="card-body">
+            <!-- Display list of addresses -->
+            {% for a in address %}
+            <h3> Address {{forloop.counter}}</h3>
+            <address>
+                <p>Mobile number: {{ a.mobile }}</p>
+                <p>Address: {{ a.address }}</p>
+                {% comment %} <p>Status: {{ a.id }}</p> {% endcomment %}
+            </address>
+            <!-- Button to make the address default -->
+            <form method="POST" >
+                {% csrf_token %}
+                {% if a.status %}
+                <i data-address-id="{{a.id}}" class="fa fa-check-circle text-success" check="{{a.id}}" ></i>
+                <button data-address-id="{{a.id}}" style="display:none;" type="submit" class="btn make-default-address button{{a.id}} action_btn">Make Default</button>
+                {%else%}
+                <i data-address-id="{{a.id}}" style="display:none;" class="fa fa-check-circle text-success" check="{{a.id}}" ></i>
+                <button data-address-id="{{a.id}}" type="submit" class="btn make-default-address button{{a.id}} action_btn">Make Default</button>
+                {% endif %}
+            </form>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<style>
+    /* Card styles */
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(236, 221, 221, 0.1);
+        background-color: #f9f9f9;
+    }
+
+    .card-header {
+        background-color: #007bff;
+        color: white;
+        padding: 10px;
+        border-radius: 8px 8px 0 0;
+    }
+
+    /* Form input styles */
+    input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+    }
+
+    input[type="text"]:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        outline: none;
+    }
+
+    /* Button styles */
+    button[type="submit"] {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+
+    /* Address styles */
+    address {
+        background-color: #f1f1f1;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    h3 {
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    p {
+        font-size: 16px;
+        color: #555;
+    }
+
+    /* Address counter styling */
+    h3 {
+        margin-top: 20px;
+        color:rgb(6, 6, 6);
+        font-weight: bold;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+</style>
+
+
+        <!-- Account Details Tab -->
+        <div class="tab-pane fade" id="account-details" role="tabpanel" aria-labelledby="account-details-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Account Details</h3>
+                </div>
+                <div class="card-body">
+                    <p>Update your account details here.</p>
+                    <!-- Add form for account details -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
