@@ -1,16 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vendor Management</title>
-   
-</head>
-<body>
-    <header>
-        <h1>Vendor Management</h1>
-    </header>
-
+{% extends "partials/baseadmin.html" %}
+{% block content %}
     <section class="vendor-list">
         <h2>All Vendors</h2>
         <table>
@@ -37,5 +26,5 @@
             </tbody>
         </table>
     </section>
-</body>
-</html>
+
+{% endblock %}
