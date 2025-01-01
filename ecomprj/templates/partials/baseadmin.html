@@ -1,0 +1,64 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+
+
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/index.css' %}">
+</head>
+<body>
+<div class="fixed top-0 w-full h-16 bg-blue-500 flex justify-between items-center px-6 z-50">
+
+  <div class="text-white text-xl font-semibold">
+    Admin Dashboard
+  </div>
+
+  <div class="flex items-center">
+    {% if request.user.image %}
+    <img src="{{ request.user.image.url }}" alt="User Profile Picture" class="w-8 h-8 rounded-full">
+    {% else %}
+    <img src="/media/default_user.png" alt="Default User Icon" class="w-8 h-8 rounded-full">
+    {% endif %}
+  </div>
+</div>
+<div class="fixed top-16 left-0 w-48 h-[calc(100vh-4rem)] bg-white border-r shadow-md">
+  <ul class="space-y-2 py-4">
+    <li>
+      <a href="{% url 'userauth:vendordashboard' %}" class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 p-2">
+        <img src="/media/dashboard.png" alt="Dashboard" class="w-5 h-5"> 
+        <span>Dashboard</span>
+      </a>
+    </li>
+    <li>
+      <a href="{% url 'userauth:vendormanagement' %}" class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 p-2">
+        <img src="/media/user.png" alt="User Management" class="w-5 h-5"> 
+        <span>User Management</span>
+      </a>
+    </li>
+    <li>
+      {% comment %} <a href="{% url 'userauth:ainfo' %}" class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 p-2">
+        <img src="/media/author.png" alt="Authors" class="w-5 h-5"> 
+        <span>Posts</span>
+      </a> {% endcomment %}
+    </li>
+    <li>
+      {% comment %} <a href="{% url 'userauth:Settings' %}" class="flex items-center space-x-3 text-gray-700 hover:bg-gray-100 p-2">
+        <img src="/media/settings.png" alt="Settings" class="w-5 h-5"> 
+        <span>Settings</span>
+      </a> {% endcomment %}
+    </li>
+  </ul>
+</div>
+<div class="ml-48 mt-20 p-6">
+  {% block content %}
+  {% endblock %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+</body>
+</html>

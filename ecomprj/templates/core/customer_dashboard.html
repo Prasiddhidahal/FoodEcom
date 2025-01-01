@@ -4,6 +4,12 @@
 {% block content %}
 <div class="container mt-5">
     <h2>Welcome to your Dashboard, {{ user.username }}!</h2>
+    <p>From your account dashboard you can view your recent orders, manage your shipping and billing addresses and edit your password and account details.</p>
+     <div class="mt-4">
+        <p>
+            {{orders}}
+        </p>
+    </div>
 
     <!-- Tabs navigation -->
     <ul class="nav nav-tabs" id="dashboardTab" role="tablist">
@@ -20,6 +26,8 @@
             <a class="nav-link" id="account-details-tab" data-toggle="tab" href="#account-details" role="tab" aria-controls="account-details" aria-selected="false">Account Details</a>
         </li>
     </ul>
+   
+
 
     <!-- Tabs content -->
     <div class="tab-content" id="dashboardTabContent">
@@ -43,20 +51,21 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for o in orders %}
+   {% for o in orders_list %}
     <tr>
         <td>Invoice_No-{{ o.id }}</td>
         <td>{{ o.order_date }}</td>
         <td>{{ o.product_status }}</td>
-        {% if o.paid_status == True%}
-        <td>Paid</td>
+        {% if o.paid_status %}
+            <td>Paid</td>
         {% else %}
-        <td>Not Paid</td>
+            <td>Not Paid</td>
         {% endif %}
         <td>{{ o.price }}</td>
         <td><a href="{% url 'core:order_detail' o.id %}">View</a></td>
     </tr>
 {% endfor %}
+
                             </tbody>
                         </table>
                     </div>

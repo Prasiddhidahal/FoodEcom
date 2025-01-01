@@ -16,6 +16,9 @@ import hmac
 import hashlib
 import hmac, hashlib,json,base64,requests
 from django.conf import settings
+import calendar
+from datetime import datetime
+from django.db.models.functions import ExtractMonth
 
 
 # Function to generate HMAC SHA256 signature
@@ -635,16 +638,16 @@ def checkout(request):
                 'amount': amount_in_paisa,
             })
         
-    try:
-         active_address= Address.objects.get(user=request.user,status=True)
+    # try:
+    #      active_address= Address.objects.get(user=request.user,status=True)
 
-    except:
-         messages.warning(request,'Multiple address default, only one should be default')
+    # except:
+    #      messages.warning(request,'Multiple address default, only one should be default')
     return render(request, 'core/checkout.html', {
         'cart_data': cart_data,
         'total_cart_items': len(cart_data),
         'cart_total_amount': cart_total_amount,
-        'active_address':active_address
+        # 'active_address':active_address
     })
 
 @login_required
@@ -675,8 +678,9 @@ def order_detail(request, order_id):
     return render(request, 'core/order_detail.html', context)
 @login_required
 def customer_dashboard(request):
-    order=CartOrder.objects.filter(user=request.user)
+    orders_list=CartOrder.objects.filter(user=request.user).order_by('-id')
     address= Address.objects.filter(user=request.user)
+    orders= CartOrder.objects.annotate(month= ExtractMonth('order_date')).values('month').annotate(count=Count('id')).values('month', 'count')
     if request.method == 'POST':
         address = request.POST.get('address')
         mobile = request.POST.get('mobile')
@@ -689,7 +693,8 @@ def customer_dashboard(request):
         messages.success(request, 'Address added successfully')
         return redirect('core:customer_dashboard')
     context={
-        'orders':order,
+        'orders': orders,
+        'orders_list':orders_list,
         'address':address
     }
     return render(request, 'core/customer_dashboard.html', context)
@@ -700,3 +705,4 @@ def make_default_address(request):
     Address.objects.update(status=False)
     Address.objects.filter(id=id).update(status=True)
     return JsonResponse({'boolean': True})
+    

@@ -4,6 +4,7 @@ from django.utils.html import mark_safe
 from userauth.models import User
 from taggit.managers import TaggableManager
 from ckeditor_uploader.fields import RichTextUploadingField
+from datetime import datetime
 
 # Choices for Status fields
 STATUS_CHOICES = [
@@ -118,6 +119,7 @@ class Product(models.Model):
     mfd=models.DateField(auto_now_add=True)
     life=models.IntegerField(default=30)
     shipping = models.CharField(max_length=100, default="Free Shipping")
+    created_at = models.DateTimeField(default=datetime.now)
     
     
     class Meta:

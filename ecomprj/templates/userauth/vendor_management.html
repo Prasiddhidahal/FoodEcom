@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Management</title>
+   
+</head>
+<body>
+    <header>
+        <h1>Vendor Management</h1>
+    </header>
+
+    <section class="vendor-list">
+        <h2>All Vendors</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for vendor in vendors %}
+                <tr>
+                    <td>{{ vendor.name }}</td>
+                    <td>{{ vendor.email }}</td>
+                    <td>{{ vendor.phone }}</td>
+                    <td>
+                        <a href="{% url 'userauth:edit_vendor' vendor.id %}">Edit</a>  
+                        <a href="{% url 'userauth:delete_vendor' vendor.id %}" onclick="return confirm('Are you sure you want to delete this vendor?')">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</body>
+</html>

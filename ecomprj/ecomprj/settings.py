@@ -153,9 +153,14 @@ AUTH_USER_MODEL = 'userauth.User'
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',  # Default backend
 )
-
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
 CKEDITOR_UPLOAD_PATH='uploads/'
-
+CSRF_TRUSTED_ORIGINS = [
+    'https://yourdomain.com',
+    'http://localhost:8000',
+]
 CKEDITOR_CONFIGS = {
     'default': {
         'skin': 'moono',

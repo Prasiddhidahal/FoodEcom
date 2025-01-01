@@ -3,12 +3,17 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=50, unique=True)
-    bio = models.CharField(max_length=255)
-    
+    bio = models.CharField(max_length=255, blank=True, null=True)
+
+    # Ensure username is set to email automatically
+    def save(self, *args, **kwargs):
+        if not self.username:
+            self.username = self.email
+        super(User, self).save(*args, **kwargs)
+
     USERNAME_FIELD = "email"  # Login will be with email instead of username
-    REQUIRED_FIELDS = ["username"]
+    REQUIRED_FIELDS = ["username"]  # Make username required during user creation
 
     def __str__(self):
-        return self.username
+        return self.email
 

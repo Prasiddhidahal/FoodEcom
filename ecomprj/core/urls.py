@@ -34,7 +34,7 @@ urlpatterns = [
     path('verify_esewa/', views.verify_esewa,name='verify_esewa'),
     path('invoice/', views.invoice,name='invoice'),
     path('customer_dashboard', views.customer_dashboard, name='customer_dashboard'),
-    path('order/<int:order_id>/', views.order_detail, name='order_detail'),
+    path('order_detail/<int:order_id>/', views.order_detail, name='order_detail'),
     path('make-default-address', views.make_default_address, name='make-default-address')
     
 
