@@ -97,7 +97,7 @@ class Tags(models.Model):
 class Product(models.Model):
     pid = ShortUUIDField(unique=True, length=10, max_length=20, alphabet="abcdegh12345")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name="category")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     title = models.CharField(max_length=100, default="Fresh Pear")
     image = models.ImageField(upload_to='products/') 
     description = RichTextUploadingField(null=True, blank=True, default="This is the product")
@@ -120,6 +120,7 @@ class Product(models.Model):
     life=models.IntegerField(default=30)
     shipping = models.CharField(max_length=100, default="Free Shipping")
     created_at = models.DateTimeField(default=datetime.now)
+    sold_quantity = models.IntegerField(default=0)
     
     
     class Meta:
@@ -161,7 +162,8 @@ class CartOrder(models.Model):
     product_status = models.CharField(choices=ORDER_STATUS_CHOICES, max_length=30, default="processing")
     payment_method = models.CharField(choices=METHOD, max_length=30, default="COD")
     payment_completed = models.BooleanField(default=False)
-    
+    sold_quantity = models.IntegerField(default=0)
+    in_stock = models.IntegerField(default=1, blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "Cart Orders"

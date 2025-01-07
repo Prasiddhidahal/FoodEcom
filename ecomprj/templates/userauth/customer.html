@@ -1,0 +1,83 @@
+{% extends "partials/baseadmin.html" %}
+{% block content %}
+<style>
+    .container {
+        margin: 20px auto;
+        max-width: 900px;
+        font-family: Arial, sans-serif;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+
+    table th, table td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #f4f4f4;
+    }
+
+    table tr:hover {
+        background-color: #f9f9f9;
+    }
+
+    a {
+        text-decoration: none;
+        color: #007bff;
+    }
+
+    a:hover {
+        text-decoration: underline;
+        color: #0056b3;
+    }
+
+    input[type="checkbox"] {
+        margin: auto;
+        display: block;
+    }
+</style>
+<div class="container">
+    <h1>Customers</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th><input type="checkbox"></th>
+                <th>Customer Name</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Order History</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for customer in customer_orders %}
+            <tr>
+                <td><input type="checkbox"></td>
+                <td>{{ customer.user.username }}</td>
+                <td>{{ customer.user.email }}</td>
+                <td>
+                    {% if customer.address %}
+                        {{ customer.address.street_address }}, {{ customer.address.city }}
+                    {% else %}
+                        No address provided
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'userauth:customer_order_details' customer.user.id %}">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "partials/baseadmin.html" %}
+{% block content %}
+<div class="container">
+    <h1>Products in {{ category.title }}</h1>
+    {% if products %}
+    <div class="categories">
+        {% for product in products %}
+        <div class="category-card">
+            <img src="{{ product.image.url }}" alt="{{ product.title }}">
+            <h3>{{ product.title }}</h3>
+            <p>${{ product.price }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No products found in this category.</p>
+    {% endif %}
+</div>
+{% endblock %}

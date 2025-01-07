@@ -1,0 +1,35 @@
+{% extends "partials/baseadmin.html" %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-6">
+    <h1 class="text-2xl font-bold mb-4">Edit Order</h1>
+    <form method="POST">
+        {% csrf_token %}
+      {% for item in order.cartorderitems_set.all %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 border border-gray-200">
+                                <img
+                                    src="{{ item.image }}"
+                                    alt="{{ item.item }}"
+                                    class="w-10 h-10 rounded-lg object-cover"
+                                />
+                            </td>
+                            <td class="px-6 py-4 border border-gray-200">Product{{ item.item }}</td><br>
+                           <td class="px-6 py-4 border border-gray-200">Quantity{{ item.qty }}</td>
+
+                        </tr>
+                        {% endfor %}
+            
+            <!-- Render other form fields -->
+            {{ form.as_p }}
+
+            <button
+                type="submit"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

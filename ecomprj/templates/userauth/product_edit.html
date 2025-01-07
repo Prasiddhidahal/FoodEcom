@@ -1,0 +1,124 @@
+{% extends "partials/baseadmin.html" %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-6">
+    <h1 class="text-2xl font-bold mb-4">Edit Product</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
+            <!-- Product Image -->
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold mb-2">Product Image</h2>
+                <img 
+                    src="{{ product.image.url }}" 
+                    alt="{{ product.title }}" 
+                    class="w-32 h-32 object-cover rounded-lg"
+                />
+                <p><strong>Current Image:</strong> {{ product.image.name }}</p>
+                <p><input type="file" name="image" class="mt-2" /></p>
+            </div>
+
+            <!-- Product Information -->
+            <div class="bg-white p-4 rounded-lg shadow-md">
+    <h2 class="text-lg font-bold mb-2">Product Information</h2>
+
+    <div class="mb-4">
+        {{ form.title.label_tag }}<br>
+        {{ form.title }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.sku.label_tag }}<br>
+        {{ form.sku }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.price.label_tag }}<br>
+        {{ form.price }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.old_price.label_tag }}<br>
+        {{ form.old_price }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.stock_quantity.label_tag }}<br>
+        {{ form.stock_quantity }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.in_stock.label_tag }}<br>
+        {{ form.in_stock }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.category.label_tag }}<br>
+        {{ form.category }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.vendor.label_tag }}<br>
+        {{ form.vendor }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.weight.label_tag }}<br>
+        {{ form.weight }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.color.label_tag }}<br>
+        {{ form.color }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.life.label_tag }}<br>
+        {{ form.life }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.shipping.label_tag }}<br>
+        {{ form.shipping }}
+    </div>
+
+    <div class="mb-4">
+        {{ form.sold_quantity.label_tag }}<br>
+        {{ form.sold_quantity }}
+    </div>
+</div>
+
+        </div>
+
+        <!-- Product Description -->
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+            <h2 class="text-lg font-bold mb-2">Product Description</h2>
+            {{ form.description.label_tag }}
+            {{ form.description }}
+        </div>
+
+        <!-- Product Specifications -->
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+            <h2 class="text-lg font-bold mb-2">Product Specifications</h2>
+            {{ form.specifications.label_tag }}
+            {{ form.specifications }}
+        </div>
+
+        <!-- Product Tags -->
+        <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+            <h2 class="text-lg font-bold mb-2">Tags</h2>
+            {{ form.tags.label_tag }}
+            {{ form.tags }}
+        </div>
+
+        <button
+            type="submit"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+            Save Changes
+        </button>
+    </form>
+</div>
+{% endblock %}

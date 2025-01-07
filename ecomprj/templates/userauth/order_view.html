@@ -1,0 +1,79 @@
+{% extends "partials/baseadmin.html" %}
+{% block content %}
+<div class="container mx-auto px-6 py-6">
+    <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Order Details</h1>
+            <a href="{% url 'userauth:orders' %}" class="text-blue-500 hover:underline">Back to Orders</a>
+        </div>
+
+        <!-- Order Info -->
+        <div class="grid grid-cols-2 gap-6">
+            <div class="bg-white p-4 rounded-lg shadow-md">
+                <h2 class="text-lg font-bold mb-2">Order Information</h2>
+                <p><strong>Order ID:</strong> #{{ order.id }}</p>
+                <p><strong>Customer:</strong> {{ order.user.username }}</p>
+                <p><strong>Order Date:</strong> {{ order.order_date|date:"M d, Y" }}</p>
+                <p><strong>Status:</strong> 
+                    <span class="px-3 py-1 rounded-lg text-sm font-semibold 
+                        {% if order.product_status == 'delivered' %}bg-green-100 text-green-800{% 
+                           elif order.product_status == 'not shipped' %}bg-red-100 text-red-800{% 
+                           else %}bg-yellow-100 text-yellow-800{% endif %}">
+                        {{ order.product_status|title }}
+                    </span>
+                </p>
+            </div>
+
+            <!-- Customer Info -->
+<div class="bg-white p-4 rounded-lg shadow-md">
+    <h2 class="text-lg font-bold mb-2">Customer Information</h2>
+    <p><strong>Full Name:</strong> {{ order.user.username }}</p>
+    <p><strong>Email:</strong> {{ order.user.email }}</p>
+    {% comment %} <p><strong>Phone:</strong> {{ order.user.profile.phone_number }}</p> {% endcomment %}
+    <p><strong>Address:</strong> {{ address}}</p>
+       
+        
+    </p>
+</div>
+
+
+
+        <!-- Products -->
+        <div class="mt-6">
+            <h2 class="text-xl font-bold mb-4">Products Ordered</h2>
+            <div class="bg-white rounded-lg shadow-md">
+                <table class="table-auto w-full text-left border-collapse border border-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 border border-gray-200">Image</th>
+                            <th class="px-6 py-4 border border-gray-200">Product Name</th>
+                            <th class="px-6 py-4 border border-gray-200">Quantity</th>
+                            <th class="px-6 py-4 border border-gray-200">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.cartorderitems_set.all %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 border border-gray-200">
+                                <img
+                                    src="{{ item.image }}"
+                                    alt="{{ item.item }}"
+                                    class="w-10 h-10 rounded-lg object-cover"
+                                />
+                            </td>
+                            <td class="px-6 py-4 border border-gray-200">{{ item.item }}</td>
+                           <td class="px-6 py-4 border border-gray-200">{{ item.qty }}</td>
+
+
+                            <td class="px-6 py-4 border border-gray-200">Rs. {{ item.price }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

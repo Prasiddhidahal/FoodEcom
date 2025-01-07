@@ -1,6 +1,7 @@
+from profile import Profile
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
-from .forms import UserRegisterForm
+from .forms import CategoryForm, ProductForm, UserRegisterForm
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
@@ -10,8 +11,17 @@ from .decorators import allowed_users
 from django.utils import timezone
 from django.db.models import Count
 from django.db.models.functions import TruncHour
-from core.models import Vendor, Product, CartOrder
+from core.models import Address, CartOrderItems, Category, Vendor, Product, CartOrder
 from django.db.models import Count, Sum
+from django.db.models.functions import TruncMonth
+from django.db.models import Sum
+import calendar  # Ensure this is imported at the top
+from django.db.models.functions import ExtractMonth
+from django.db.models import Count
+from django.contrib import messages
+from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed
+from .forms import ProductEditForm
 
 User = get_user_model()  # Correctly retrieve the user model
 
@@ -90,61 +100,83 @@ def user_logout(request):
 
 
 
-
 @login_required
 @allowed_users(allowed_roles=['Admin'])
-def vendordashboard(request):
+def admindashboard(request):
     # Restrict access to superusers only
     if not request.user.is_superuser:
-        return redirect('userauth:unauthorized')  
+        return redirect('userauth:unauthorized')
 
-    # Current date to filter products, vendors, and orders created today
-    now = timezone.now()
-    start_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    # Get orders for the logged-in user
+    orders_list = CartOrder.objects.filter(user=request.user).order_by("-id")
+    add = Address.objects.filter(user=request.user)
 
-    # Orders created today by hour
-    orders_by_hour = CartOrder.objects.filter(order_date=start_time) \
-        .order_by('order_date') \
-        .annotate(hour=TruncHour('order_date')) \
-        .values('hour') \
-        .annotate(count=Count('id')) \
-        .order_by('hour')
+    # Calculate Total Sales Today
+    total_sales_today = (
+        CartOrder.objects.filter(user=request.user, order_date__date=timezone.now().date())
+        .aggregate(total=Sum('price'))['total'] or 0
+    )
 
-    # Vendors created today
-    vendors_today = Vendor.objects.filter(date=start_time.date()).count()
+    # Calculate Current Month Sales
+    current_month = timezone.now().month
+    current_month_sales = (
+        CartOrder.objects.filter(user=request.user, order_date__month=current_month)
+        .aggregate(total=Sum('price'))['total'] or 0
+    )
 
-    # Products added today
-    products_today = Product.objects.filter(created_at__date=start_time.date()).count()
+    # Calculate Average Monthly Sales
+    monthly_sales = (
+        CartOrder.objects.filter(user=request.user)
+        .annotate(month=ExtractMonth("order_date"))
+        .values("month")
+        .annotate(total_sales=Sum("price"))
+        .values_list("total_sales", flat=True)
+    )
+    if monthly_sales:
+        average_sales = sum(monthly_sales) / len(monthly_sales)
+    else:
+        average_sales = 0
 
-    # Total sales (sum of prices of all orders today)
-    total_sales_today = CartOrder.objects.filter(order_date=start_time) \
-        .aggregate(Sum('price'))['price__sum'] or 0
+    # Prepare data for the chart
+    orders = (
+        CartOrder.objects.annotate(month=ExtractMonth("order_date"))
+        .values('month')
+        .annotate(count=Count("id"))
+        .values("month", "count")
+    )
+    month = []
+    total_orders = []
+    for order in orders:
+        month_name = calendar.month_name[order['month']]  # Correct usage of calendar.month_name
+        month.append(month_name)
+        total_orders.append(order['count'])
 
-    # Data for charts (orders per hour)
-    hours = list(range(0, 24))
-    order_data = [0] * 24  # To store orders per hour
-
-    # Fill in order data by hour
-    for order in orders_by_hour:
-        order_data[order['hour'].hour] = order['count']
-
-    # Get total number of vendors, products, and orders
-    total_vendors = Vendor.objects.count()
-    total_products = Product.objects.count()
-    total_orders = CartOrder.objects.count()
+    # Handle adding a new address
+    if request.method == "POST":
+        address = request.POST.get("address")
+        mobile = request.POST.get("mobile")
+        new_address = Address.objects.create(
+            user=request.user,
+            address=address,
+            mobile=mobile
+        )
+        messages.success(request, "Address Added Successfully")
 
     context = {
-        'hours': hours,
-        'order_data': order_data,
-        'vendors_today': vendors_today,
-        'products_today': products_today,
-        'total_sales_today': total_sales_today,
-        'total_vendors': total_vendors,
-        'total_products': total_products,
-        'total_orders': total_orders,
+        "orders_list": orders_list,
+        "orders": orders,
+        "address": add,
+        "month": month,
+        "total_orders": total_orders,
+        "total_sales_today": total_sales_today,
+        "current_month_sales": current_month_sales,
+        "average_sales": average_sales,
     }
 
-    return render(request, 'userauth/vendordashboard.html', context)
+    return render(request, 'userauth/admindashboard.html', context)
+
+
+
 
 
 @csrf_protect
@@ -216,3 +248,197 @@ def unauthorized(request):
     return render(request, 'userauth/unauthorized.html', {
         'message': 'You do not have permission to access this page.'
     })
+
+def products(request):
+    return render(request, 'userauth/products.html')
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def orders(request):
+    if not request.user.is_superuser:
+        return redirect('userauth:unauthorized')
+    orders = CartOrder.objects.all()
+    return render(request, 'userauth/orders.html', {'orders': orders})
+
+def order_view(request, order_id):
+    order = get_object_or_404(CartOrder, id=order_id)
+    context = {
+        'order': order,
+    }
+    return render(request, 'userauth/order_view.html', context)
+
+from .forms import OrderEditForm
+
+def order_edit(request, order_id):
+    # Fetch the order to be edited
+    order = get_object_or_404(CartOrder, id=order_id)
+    
+    # Get the cart items for the current order
+    cart_items = CartOrderItems.objects.filter(order=order)  # Assuming CartItem has a ForeignKey to CartOrder
+    
+    # Calculate total number of items ordered by summing the quantities of cart items
+    total_items_ordered = sum(item.qty for item in cart_items)
+    
+    # If the form is being submitted
+    if request.method == 'POST':
+        form = OrderEditForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()  # Save the updated order
+            return redirect('userauth:orders')  # Redirect to view page after saving
+    else:
+        form = OrderEditForm(instance=order)  # Pre-fill form with current order data
+    
+    context = {
+        'form': form,
+        'order': order,
+        'cart_items': cart_items,  # Pass cart items to the template
+        'total_items_ordered': total_items_ordered,  # Pass the total number of items ordered
+    }
+
+    return render(request, 'userauth/order_edit.html', context)
+
+def order_delete(request, order_id):
+    if request.method == "POST":
+        order = get_object_or_404(CartOrder, id=order_id)
+        order.delete()
+        return redirect('userauth:orders')
+    return HttpResponseNotAllowed(['POST'])
+def customer_orders(request):
+    # Get all users who have placed orders
+    users = User.objects.all()
+    
+    # Initialize a list to store customer order details
+    customer_orders = []
+    
+    # Loop through users and get their orders and address
+    for user in users:
+        orders = CartOrder.objects.filter(user=user).order_by('-order_date')
+        address = Address.objects.filter(user=user).first()  # Get the user's address (if it exists)
+        
+        # Only add customers who have orders
+        if orders:
+            customer_orders.append({
+                'user': user,
+                'orders': orders,
+                'address': address  # Add address to the context
+            })
+
+    context = {
+        'customer_orders': customer_orders
+    }
+
+    return render(request, 'userauth/customer.html', context)
+
+
+def customer_order_details(request, user_id):
+    # Get the user object by user_id
+    user = get_object_or_404(User, id=user_id)
+
+    # Get all the orders for this user
+    orders = CartOrder.objects.filter(user=user).order_by('-order_date')
+
+    context = {
+        'user': user,
+        'orders': orders
+    }
+
+    return render(request, 'userauth/customer_order_details.html', context)
+
+
+def add_product(request):
+    return render(request, 'userauth/add_product.html')
+
+
+
+
+
+def category_list(request):
+    categories = Category.objects.all()
+
+    # Handling the form submission for creating new category
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        image = request.FILES.get('image')
+
+        # Create and save the new category
+        new_category = Category.objects.create(
+            title=title,
+            image=image
+        )
+        # Redirect to the category list page after adding the new category
+        return redirect('userauth:category_list')  # Use URL name instead of a direct file reference
+
+    return render(request, 'userauth/categories.html', {'categories': categories})
+
+def category_detail(request, category_id):
+    # Get the category by ID
+    category = get_object_or_404(Category, id=category_id)
+    # Get all products in this category using the correct related_name
+    products = category.products.all()
+    return render(request, 'userauth/category_detail.html', {'category': category, 'products': products})
+
+
+@csrf_protect
+# @login_required
+# @allowed_users(allowed_roles=['Admin'])
+def products(request):
+    if not request.user.is_superuser:
+        return redirect('userauth:unauthorized')
+    
+    # Get all products
+    products = Product.objects.all()
+
+    # Handle form submission for creating new product
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('userauth:products')  # Redirect to the product list after saving
+
+    else:
+        form = ProductForm()
+
+    return render(request, 'userauth/products.html', {'products': products, 'form': form})
+
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def product_view(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    context = {
+        'product': product,
+    }
+    return render(request, 'userauth/product_view.html', context)
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def product_edit(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    
+    if request.method == 'POST':
+        form = ProductEditForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()  # Save the updated product
+            return redirect('userauth:products')  # Redirect to products list after saving
+    else:
+        form = ProductEditForm(instance=product)  # Pre-fill form with current product data
+    
+    context = {
+        'form': form,
+        'product': product,
+    }
+    
+    return render(request, 'userauth/product_edit.html', context)
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def product_delete(request, product_id):
+    if request.method == "POST":
+        product = get_object_or_404(Product, id=product_id)
+        product.delete()
+        return redirect('userauth:products')
+    return HttpResponseNotAllowed(['POST'])

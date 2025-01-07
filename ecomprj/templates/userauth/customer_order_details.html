@@ -1,0 +1,97 @@
+{% extends "partials/baseadmin.html" %}
+{% block content %}
+<style>
+    .container {
+        margin: 20px auto;
+        max-width: 900px;
+        font-family: Arial, sans-serif;
+    }
+
+    h1 {
+        text-align: center;
+        color: #333;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+
+    table th, table td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #f4f4f4;
+    }
+
+    table tr:hover {
+        background-color: #f9f9f9;
+    }
+
+    ul {
+        
+        padding-left: 20px;
+    }
+
+    ul li {
+        margin: 5px 0;
+    }
+    .order-table ul {
+    list-style-type: disc;
+    padding-left: 20px;
+}
+
+.order-table ul li {
+    margin: 5px 0;
+}
+
+</style>
+<div class="container order-table">
+    <h1>Orders for {{ customer.username }}</h1>
+    {% if orders %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Order Date</th>
+                <th>Price</th>
+                <th>Paid Status</th>
+                <th>Payment Method</th>
+                <th>Products</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.order_date }}</td>
+                <td>${{ order.price }}</td>
+                <td>{% if order.paid_status %}Paid{% else %}Pending{% endif %}</td>
+                <td>{{ order.payment_method }}</td>
+                <td>
+                    <ul>
+                        {% for item in order.cartorderitems_set.all %}
+                        <li>
+                            <img
+                                src="{{ item.image }}"
+                                alt="{{ item.item }}"
+                                class="w-10 h-10 rounded-lg object-cover"
+                            />
+                            {{ item.item }} (Qty: {{ item.qty }}) - ${{ item.price }} each
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No orders found for this customer.</p>
+    {% endif %}
+</div>
+{% endblock %}

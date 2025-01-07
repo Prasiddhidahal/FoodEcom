@@ -1,0 +1,122 @@
+{% extends "partials/baseadmin.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-6">
+    <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Products</h1>
+            
+            <input
+                type="text"
+                class="border border-gray-300 rounded-lg px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Search for products..."
+            />
+        </div>
+
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-lg font-semibold text-gray-700">Add New Product</h2>
+        </div>
+
+        <!-- Product Add Form -->
+        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            <div class="flex flex-col">
+                {{ form.as_p }}
+            </div>
+            <button type="submit" class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Add Product
+            </button>
+        </form>
+    </div>
+
+    <!-- Products Table -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow-lg mt-6">
+        <table class="table-auto w-full text-left border-collapse border border-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-4 border border-gray-200">
+                        <input type="checkbox" />
+                    </th>
+                    <th class="px-6 py-4 border border-gray-200">Image</th>
+                    <th class="px-6 py-4 border border-gray-200">Product Name</th>
+                    <th class="px-6 py-4 border border-gray-200">Price</th>
+                    <th class="px-6 py-4 border border-gray-200">SKU</th>
+                    <th class="px-6 py-4 border border-gray-200">Categories</th>
+                    <th class="px-6 py-4 border border-gray-200">Stock</th>
+                    <th class="px-6 py-4 border border-gray-200">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 border border-gray-200">
+                        <input type="checkbox" />
+                    </td>
+                    <td class="px-6 py-4 border border-gray-200">
+                        <img
+                            src="{{ product.image.url }}"
+                            alt="{{ product.title }}"
+                            class="w-10 h-10 rounded-lg object-cover"
+                        />
+                    </td>
+                    <td class="px-6 py-4 border border-gray-200 font-semibold text-gray-800">
+                        {{ product.title }}
+                    </td>
+                    <td class="px-6 py-4 border border-gray-200">Rs. {{ product.price }}</td>
+                    <td class="px-6 py-4 border border-gray-200">{{ product.sku }}</td>
+                    <td class="px-6 py-4 border border-gray-200">
+                        {{ product.category|join:", " }}
+                    </td>
+                    <td class="px-6 py-4 border border-gray-200">
+                        <span
+                            class="{% if product.stock_quantity < 10 %}text-red-600{% else %}text-gray-800{% endif %}">
+                            {{ product.stock_quantity }} remaining
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 border border-gray-200">
+                        <div class="flex space-x-2">
+                            <!-- View -->
+                            <a
+                                href="{% url 'userauth:product_view' product.id %}"
+                                class="text-blue-500 hover:text-blue-700"
+                            >
+                                View
+                            </a>
+                            <!-- Edit -->
+                            <a
+                                href="{% url 'userauth:product_edit' product.id %}"
+                                class="text-yellow-500 hover:text-yellow-700"
+                            >
+                                Edit
+                            </a>
+                            <!-- Delete -->
+                            <form
+                                method="POST"
+                                action="{% url 'userauth:product_delete' product.id %}"
+                                onsubmit="return confirm('Are you sure you want to delete this product?');"
+                            >
+                                {% csrf_token %}
+                                <button
+                                    type="submit"
+                                    class="text-red-500 hover:text-red-700"
+                                >
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="px-6 py-4 text-center text-gray-600">
+                        No products found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
