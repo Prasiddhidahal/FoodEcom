@@ -1,0 +1,37 @@
+{% extends 'partials/baseadmin.html' %}
+
+{% block content %}
+<h2>Ad List</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Image</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+{% for ads in ad %}
+    <tr>
+        <td>
+            {% if ads.image %}
+                <img src="{{ ads.image.url }}" width="100" height="100" alt="Ad Image">
+            {% else %}
+                No Image
+            {% endif %}
+        </td>
+        <td>{{ ads.status }}</td>
+        <td>
+            <a href="{% url 'userauth:ad_edit' ads.id %}">Edit</a> |
+            <form action="{% url 'userauth:ad_delete' ads.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this ad?');">
+                {% csrf_token %}
+                <button type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+{% endfor %}
+
+
+
+    </tbody>
+</table>
+{% endblock %}

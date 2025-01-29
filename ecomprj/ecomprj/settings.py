@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'userauth',
     'taggit',
     'ckeditor',
+    'django.contrib.humanize',
     # 'ckeditor_uploader',
 ]
 

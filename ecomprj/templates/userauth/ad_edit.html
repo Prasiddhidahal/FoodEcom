@@ -1,0 +1,16 @@
+{% extends 'partials/baseadmin.html' %}
+
+{% block content %}
+<h2>Edit Ad</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ ad_form.as_p }}
+    
+     {% comment %} {% if ad_image_form.instance.image %}
+        <img src="{{ ad_image_form.instance.image.url }}" width="100" />
+    {% endif %}  {% endcomment %}
+    
+    <button type="submit">Save Changes</button>
+</form>
+{% endblock %}

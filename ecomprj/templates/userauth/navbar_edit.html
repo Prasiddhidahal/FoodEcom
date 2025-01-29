@@ -1,0 +1,74 @@
+{% extends "partials/baseadmin.html" %}
+{% load static %}
+
+{% block content %}
+<div class="edit-navbar-container">
+    <h2 class="edit-navbar-title">Edit Navbar Item</h2>
+    <form method="POST" class="edit-navbar-form">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="submit-button">Save Changes</button>
+    </form>
+
+    <a href="{% url 'userauth:navbars' %}" class="cancel-button">Cancel</a>
+</div>
+
+<style>
+    .edit-navbar-container {
+        max-width: 800px;
+        margin: 30px auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .edit-navbar-title {
+        font-size: 28px;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 20px;
+    }
+
+    .edit-navbar-form {
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .submit-button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .submit-button:hover {
+        background-color: #0056b3;
+    }
+
+    .cancel-button {
+        display: inline-block;
+        margin-top: 15px;
+        background-color: #dc3545;
+        color: white;
+        padding: 10px 15px;
+        text-decoration: none;
+        font-size: 16px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
+
+    .cancel-button:hover {
+        background-color: #c82333;
+    }
+</style>
+{% endblock %}

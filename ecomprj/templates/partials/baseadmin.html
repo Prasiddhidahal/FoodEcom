@@ -19,6 +19,18 @@
             <nav class="mt-6">
                 <ul>
                     <li>
+                        <a href="{% url 'userauth:navbars' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                            <span class="material-icons">Nav</span>
+                            <span class="ml-4">Navbar</span>
+                        </a>
+                    </li>
+                     <li>
+                        <a href="{% url 'userauth:ad_list' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                            <span class="material-icons">Nav</span>
+                            <span class="ml-4">Advertisement</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="{% url 'userauth:admindashboard' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
                             <span class="material-icons">dashboard</span>
                             <span class="ml-4">Dashboard</span>
@@ -40,6 +52,27 @@
     <a href="{% url 'userauth:customer_orders'  %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
         <span class="material-icons">people</span>
         <span class="ml-4">Customers</span>
+    </a>
+</li>
+{% block sidebar %}
+    {{ block.super }}
+     <li>
+    <a href="{% url 'userauth:activity_log'  %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+        <span class="material-icons">history</span>
+
+        <span class="ml-4">Activity Log</span>
+    </a>
+</li>
+{% endblock %}
+   <li>
+    <a href="{% url 'userauth:manage_roles'  %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+        <span class="material-icons">people</span>
+        <span class="ml-4">manage Roles</span>
+    </a>
+</li>   <li>
+    <a href="{% url 'userauth:manage_group_permissions'  %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+        <span class="material-icons">people</span>
+        <span class="ml-4">manage Permission</span>
     </a>
 </li>
                     <li>

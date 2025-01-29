@@ -136,18 +136,22 @@ def verify_esewa(request):
             print(e)
             messages.error(request,"The service is currently down please try again later or contact our representatives")
             return redirect("core:index")
+from .models import  Navbar, Category, Ad 
 
 def index(request):
     products = Product.objects.filter(product_status="published")
     categories = Category.objects.all()
     vendors = Vendor.objects.all()
-    
-    # Latest Products
+
+    # Latest Products that are in stock and published
     latest_products = Product.objects.filter(
         product_status="published", in_stock=True
     ).order_by('-mfd')[:6]
     
-    # Top Rated Products
+    # Products that are on sale
+    in_sale = Product.objects.filter(in_sale=True, product_status="published")[:6]
+
+    # Top-rated products with average ratings
     top_rated_products = Product.objects.filter(
         product_status="published"
     ).annotate(
@@ -156,25 +160,37 @@ def index(request):
         average_rating__isnull=False  # Exclude products with no ratings
     ).order_by('-average_rating')[:3]
     
-    # Reviewed Products (Products that have been reviewed)
+    # Reviewed products (those with more than 0 reviews)
     reviewed_products = Product.objects.filter(
         product_status="published"
     ).annotate(
-        review_count=Count('reviews')  # Count the number of reviews for each product
+        review_count=Count('reviews')
     ).filter(
-        review_count__gt=0  # Only include products with at least 1 review
-    )[:6]  # Limit to 6 products, you can adjust this number
+        review_count__gt=0
+    )[:6]  # Limit to 6 products
 
+    # Fetch the active navbar items and order them by the 'order' field
+    navbars = Navbar.objects.filter(status='Active').order_by('order')
+    
+    # Fetch active advertisements
+    ads = Ad.objects.filter(status='Active').prefetch_related('images')  [:1]
+    ads2 = Ad.objects.filter(	status='Active').prefetch_related('images')[1:]
+    
     context = {
         'products': products,
         'categories': categories,
         'vendors': vendors,
         'latest_products': latest_products,
         'top_rated_products': top_rated_products,
-        'reviewed_products': reviewed_products,  # Add reviewed products to context
+        'reviewed_products': reviewed_products,
+        'in_sale': in_sale,
+        'navbars': navbars, 
+        'ads': ads  ,
+        'ads2': ads2
     }
 
     return render(request, 'core/index.html', context)
+
 
 def categories(request):
     # Get all categories

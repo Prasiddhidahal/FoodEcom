@@ -1,0 +1,125 @@
+{% extends "partials/baseadmin.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Custom CSS specific to this page */
+    .group-permissions-page {
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+        background-color: #f7f7f7;
+    }
+
+    .group-permissions-page h1, .group-permissions-page h2 {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 20px;
+    }
+
+    .group-permissions-page form {
+        width: 80%;
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .group-permissions-page .form-group {
+        margin-bottom: 20px;
+        text-align: left;
+    }
+
+    .group-permissions-page .form-group label {
+        font-weight: bold;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .group-permissions-page .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .group-permissions-page button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        width: 100%;
+    }
+
+    .group-permissions-page button:hover {
+        background-color: #2980b9;
+    }
+
+    .group-permissions-page ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .group-permissions-page ul li {
+        background-color: #ecf0f1;
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 16px;
+        color: #2c3e50;
+    }
+
+    .group-permissions-page hr {
+        border: 1px solid #ccc;
+        margin: 40px 0;
+    }
+
+    /* Responsive styling */
+    @media (max-width: 768px) {
+        .group-permissions-page form {
+            width: 90%;
+            padding: 15px;
+        }
+
+        .group-permissions-page button {
+            padding: 10px;
+            font-size: 14px;
+        }
+    }
+</style>
+
+<div class="group-permissions-page">
+    <h1>Manage Group Permissions</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="group">Select Group:</label>
+            {{ form.group }}
+        </div>
+
+        <div class="form-group">
+            <label for="permissions">Select Permissions:</label>
+            {{ form.permissions }}
+        </div>
+
+        <button type="submit">Save Permissions</button>
+    </form>
+
+    <h2>Existing Groups</h2>
+    <ul>
+        {% for group in groups %}
+            <li>{{ group.name }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

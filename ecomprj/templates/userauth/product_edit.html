@@ -7,9 +7,22 @@
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
+        {% if form.errors %}
+        <div class="bg-red-500 text-white p-4 rounded mb-4">
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-4">
             <!-- Product Image -->
             <div class="bg-white p-4 rounded-lg shadow-md">
+                 <p>{{ request.user.username }}</p>
                 <h2 class="text-lg font-bold mb-2">Product Image</h2>
                 <img 
                     src="{{ product.image.url }}" 
@@ -22,74 +35,78 @@
 
             <!-- Product Information -->
             <div class="bg-white p-4 rounded-lg shadow-md">
-    <h2 class="text-lg font-bold mb-2">Product Information</h2>
+                <h2 class="text-lg font-bold mb-2">Product Information</h2>
 
-    <div class="mb-4">
-        {{ form.title.label_tag }}<br>
-        {{ form.title }}
-    </div>
+                <div class="mb-4">
+                    {{ form.title.label_tag }}<br>
+                    {{ form.title }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.sku.label_tag }}<br>
-        {{ form.sku }}
-    </div>
+                <div class="mb-4">
+                    {{ form.sku.label_tag }}<br>
+                    {{ form.sku }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.price.label_tag }}<br>
-        {{ form.price }}
-    </div>
+                <div class="mb-4">
+                    {{ form.price.label_tag }}<br>
+                    {{ form.price }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.old_price.label_tag }}<br>
-        {{ form.old_price }}
-    </div>
+                <div class="mb-4">
+                    {{ form.old_price.label_tag }}<br>
+                    {{ form.old_price }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.stock_quantity.label_tag }}<br>
-        {{ form.stock_quantity }}
-    </div>
+                <div class="mb-4">
+                    {{ form.stock_quantity.label_tag }}<br>
+                    {{ form.stock_quantity }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.in_stock.label_tag }}<br>
-        {{ form.in_stock }}
-    </div>
+                <div class="mb-4">
+                    {{ form.in_stock.label_tag }}<br>
+                    {{ form.in_stock }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.category.label_tag }}<br>
-        {{ form.category }}
-    </div>
+                <div class="mb-4">
+                    {{ form.in_sale.label_tag }}<br>
+                    {{ form.in_sale }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.vendor.label_tag }}<br>
-        {{ form.vendor }}
-    </div>
+                <div class="mb-4">
+                    {{ form.category.label_tag }}<br>
+                    {{ form.category }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.weight.label_tag }}<br>
-        {{ form.weight }}
-    </div>
+                <div class="mb-4">
+                    {{ form.vendor.label_tag }}<br>
+                    {{ form.vendor }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.color.label_tag }}<br>
-        {{ form.color }}
-    </div>
+                <div class="mb-4">
+                    {{ form.weight.label_tag }}<br>
+                    {{ form.weight }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.life.label_tag }}<br>
-        {{ form.life }}
-    </div>
+                <div class="mb-4">
+                    {{ form.color.label_tag }}<br>
+                    {{ form.color }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.shipping.label_tag }}<br>
-        {{ form.shipping }}
-    </div>
+                <div class="mb-4">
+                    {{ form.life.label_tag }}<br>
+                    {{ form.life }}
+                </div>
 
-    <div class="mb-4">
-        {{ form.sold_quantity.label_tag }}<br>
-        {{ form.sold_quantity }}
-    </div>
-</div>
+                <div class="mb-4">
+                    {{ form.shipping.label_tag }}<br>
+                    {{ form.shipping }}
+                </div>
 
+                <div class="mb-4">
+                    {{ form.sold_quantity.label_tag }}<br>
+                    {{ form.sold_quantity }}
+                </div>
+            </div>
         </div>
 
         <!-- Product Description -->
@@ -112,6 +129,10 @@
             {{ form.tags.label_tag }}
             {{ form.tags }}
         </div>
+
+        <!-- Updated By -->
+    
+
 
         <button
             type="submit"

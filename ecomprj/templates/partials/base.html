@@ -149,58 +149,167 @@
                 </div>
             </div>
         </div>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-3">
-                    <div class="header__logo">
-                        <a href="{% url 'core:index' %}"><img src="{% static 'img/logo.png' %}" alt=""></a>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <nav class="header__menu">
-                        <ul>
-                            <li><a href="{% url 'core:index' %}">Home</a></li>
-                            <li><a href="{% url 'core:shop' %}">Shop</a></li>
-                            <li><a href="#">Category</a>
-                                <ul class="header__menu__dropdown">
-                                    {% for c in categories %}
-                                        <li><a href="{% url 'core:category_product_list' c.cid %}">{{ c.title }}</a></li>
-                                    {% endfor %}
-                                    <li><hr></li>
-                                    <li><a href="{% url 'core:categories' %}">All Categories</a></li>
-                                </ul>
+      <div class="container">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="header__logo">
+                <a href="{% url 'core:index' %}"><img src="{% static 'img/logo.png' %}" alt=""></a>
+            </div>
+        </div>
+       <div class="col-lg-6">
+    <nav class="header__menu">
+        <ul>
+            <!-- Navbar Links -->
+<nav class="navbar">
+    <ul>
+        {% for navbar in navbars %}
+            <li class="nav-item {% if navbar.children.all %}dropdown{% endif %}">
+                <a href="{{ navbar.url }}" class="nav-link {% if navbar.children.all %}dropdown-toggle{% endif %}"
+                   {% if navbar.children.all %}data-toggle="dropdown"{% endif %}>
+                    {{ navbar.title }}
+                </a>
+                {% if navbar.children.all %}
+                    <ul class="dropdown-menu">
+                        {% for child in navbar.children.all %}
+                            <li class="dropdown-item {% if child.children.all %}dropdown{% endif %}">
+                                <a href="{{ child.url }}" class="nav-link {% if child.children.all %}dropdown-toggle{% endif %}"
+                                   {% if child.children.all %}data-toggle="dropdown"{% endif %}>
+                                    {{ child.title }}
+                                </a>
+                                {% if child.children.all %}
+                                    <ul class="dropdown-menu">
+                                        {% for sub_child in child.children.all %}
+                                            <li class="dropdown-item">
+                                                <a href="{{ sub_child.url }}">{{ sub_child.title }}</a>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
                             </li>
-                            <li><a href="#">Pages</a>
-                                <ul class="header__menu__dropdown">
-                                    <li><a href="{% url 'core:cart' %}">Shopping Cart</a></li>
-                                    <li><a href="{% url 'core:checkout' %}">Checkout</a></li>
-                                    <li><a href="{% url 'core:blog_details' %}">Blog Details</a></li>
-                                </ul>
-                            </li>
-                            <li><a href="{% url 'core:blog' %}">Blog</a></li>
-                            <li><a href="{% url 'core:contact' %}">Contact</a></li>
-                            <li><a href="{% url 'core:vendor_list' %}">Vendors</a></li>
-                        </ul>
-                    </nav>
-                </div>
-                <div class="col-lg-3">
-                    <div class="header__cart">
-                        <ul>
-                            <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
-                            <li><a href="{% url 'core:cart' %}"><i class="fa fa-shopping-bag"></i> <span>3</span></a></li>
-                        </ul>
-                        <div class="header__cart__price">Items: <span>$</span><span id="cart-total-price">{{ cart_total_amount }}</span></div>
-                    </div>
-                    <div class="cart-dropdown-wrap">
-                        <div class="cart-dropdown">
-                            <a href="{% url 'core:cart' %}" class="site-btn">View Cart</a>
-                            <a href="{% url 'core:checkout' %}" class="site-btn">Checkout</a>
-                        </div>
-                    </div>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</nav>
+
+
+<style>
+   /* Basic Navbar Styling */
+.navbar {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+}
+
+.nav-item {
+    position: relative;
+}
+
+.nav-link {
+    padding: 10px 15px;
+    display: block;
+    text-decoration: none;
+    color: #333;
+}
+
+.nav-link:hover {
+    background-color: #f8f8f8;
+    color: #000;
+}
+
+/* Dropdown Menu Styling */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #fff;
+    list-style: none;
+    padding: 10px;
+    margin: 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.dropdown-item {
+    padding: 8px 12px;
+}
+
+.dropdown-item a {
+    text-decoration: none;
+    color: #333;
+}
+
+.dropdown-item a:hover {
+    background-color: #f1f1f1;
+}
+
+/* Show dropdown on hover */
+.nav-item:hover .dropdown-menu {
+    display: block;
+}
+
+/* Handle Nested Dropdowns */
+.dropdown-menu .dropdown {
+    position: relative;
+}
+
+.dropdown-menu .dropdown-menu {
+    top: 0;
+    left: 100%;
+}
+
+</style>
+
+
+            
+            <!-- Categories Dropdown -->
+            <li><a href="#">Category</a>
+                <ul class="header__menu__dropdown">
+                    {% for c in categories %}
+                        <li><a href="{% url 'core:category_product_list' c.cid %}">{{ c.title }}</a></li>
+                    {% endfor %}
+                    <li><hr></li>
+                    <li><a href="{% url 'core:categories' %}">All Categories</a></li>
+                </ul>
+            </li>
+
+            <!-- Other Links -->
+            <li><a href="#">Pages</a>
+                <ul class="header__menu__dropdown">
+                    <li><a href="{% url 'core:cart' %}">Shopping Cart</a></li>
+                    <li><a href="{% url 'core:checkout' %}">Checkout</a></li>
+                    <li><a href="{% url 'core:blog_details' %}">Blog Details</a></li>
+                </ul>
+            </li>
+            <li><a href="{% url 'core:blog' %}">Blog</a></li>
+            <li><a href="{% url 'core:contact' %}">Contact</a></li>
+            <li><a href="{% url 'core:vendor_list' %}">Vendors</a></li>
+        </ul>
+    </nav>
+</div>
+
+        <div class="col-lg-3">
+            <div class="header__cart">
+                <ul>
+                    <li><a href="#"><i class="fa fa-heart"></i> <span>1</span></a></li>
+                    <li><a href="{% url 'core:cart' %}"><i class="fa fa-shopping-bag"></i> <span>3</span></a></li>
+                </ul>
+                <div class="header__cart__price">Items: <span>$</span><span id="cart-total-price">{{ cart_total_amount }}</span></div>
+            </div>
+            <div class="cart-dropdown-wrap">
+                <div class="cart-dropdown">
+                    <a href="{% url 'core:cart' %}" class="site-btn">View Cart</a>
+                    <a href="{% url 'core:checkout' %}" class="site-btn">Checkout</a>
                 </div>
             </div>
         </div>
-    </header>  <!-- Header Section End -->
+    </div>
+</div>
+<!-- Header Section End -->
   {% if messages %}
     <div class="container mt-3">
         {% for message in messages %}

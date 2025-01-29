@@ -5,6 +5,7 @@ from userauth.models import User
 from taggit.managers import TaggableManager
 from ckeditor_uploader.fields import RichTextUploadingField
 from datetime import datetime
+from django.contrib import admin
 
 # Choices for Status fields
 STATUS_CHOICES = [
@@ -12,6 +13,8 @@ STATUS_CHOICES = [
     ('outofstock', 'Out of Stock'),
     ('Pending', 'Pending'),
     ('Discontinued', 'Discontinued'),
+    ('Inactive', 'Inactive'),
+    
 ]
 PRODUCT_STATUS_CHOICES = [
     ('draft', 'Draft'),
@@ -19,6 +22,7 @@ PRODUCT_STATUS_CHOICES = [
     ('rejected', 'Rejected'),
     ('published', 'Published'),
     ('archived', 'Archived'),
+    ('Sale', 'Sale'),
 ]
 ORDER_STATUS_CHOICES = [
     ('processing', 'Processing'),
@@ -37,15 +41,73 @@ METHOD=[
     ('Esewa','Esewa'),
     ('Khalti','Khalti'),
 ]
+ACTION_TYPES = (
+        ('LOGIN', 'Login'),
+        ('LOGOUT', 'Logout'),
+        ('PRODUCT_CREATED', 'Product Created'),
+        ('PRODUCT_UPDATED', 'Product Updated'),
+        ('PRODUCT_DELETED', 'Product Deleted'),
+        ('CATEGORY_CREATED', 'Category Created'),
+        ('CATEGORY_UPDATED', 'Category Updated'),
+        ('CATEGORY_DELETED', 'Category Deleted'),
+    )
 
 # Helper function to generate upload path
 def user_directory_path(instance, filename):
     return 'user/{0}/{1}'.format(instance.title, filename)
 
+class Navbar(models.Model):
+    title = models.CharField(max_length=100)
+    url = models.URLField(max_length=200, null=True, blank=True, default="http://127.0.0.1:8000/#")
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="Active")
+    created_by = models.ForeignKey(User, related_name="created_navbars", on_delete=models.SET_NULL, null=True, blank=True)
+    order = models.IntegerField(default=0)
+    parent = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children'
+    )
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['order']
+
+    class Meta:
+        verbose_name_plural = "Navbar"
+    
+class Ad(models.Model):
+    image = models.ImageField(upload_to="Ad")
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="Active")  # Increase max_length
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updated_Ad')
+
+    class Meta:
+        verbose_name_plural = "Ad"
+
+    def ad_image(self):
+        return mark_safe('<img src="%s" width="50" height="50" />' % self.image.url)
+
+    def __str__(self):
+        return self.status
+
+
+class Adimage(models.Model):
+    ad = models.ForeignKey(Ad, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='ad_images/')
+    
+    def ad_image(self):
+        return mark_safe('<img src="%s" width="50" height="50" />' % self.image.url)
+
+    def __str__(self):
+        return f"Image for {self.ad.status}"
+
+    
 class Category(models.Model):
     cid = ShortUUIDField(unique=True, length=10, max_length=20, prefix="cat", alphabet="abcdegh12345")
     title = models.CharField(max_length=100)
     image = models.ImageField(upload_to="category")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="Active")  # Increase max_length
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updated_categories')
 
     class Meta:
         verbose_name_plural = "Categories"
@@ -111,6 +173,7 @@ class Product(models.Model):
     stock_quantity = models.PositiveIntegerField(default=0)  # You can set the default value as needed
     # Boolean Field to check if the product is available
     in_stock = models.BooleanField(default=True)
+    in_sale = models.BooleanField(default=False) 
     featured = models.BooleanField(default=False)
     digital = models.BooleanField(default=False)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='products')  # Rename to lowercase 'vendor'
@@ -121,8 +184,9 @@ class Product(models.Model):
     shipping = models.CharField(max_length=100, default="Free Shipping")
     created_at = models.DateTimeField(default=datetime.now)
     sold_quantity = models.IntegerField(default=0)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updated_products')
     
-    
+
     class Meta:
         verbose_name_plural = "Products"     
 
@@ -224,3 +288,22 @@ class Address(models.Model):
     def __str__(self):
         return f"{self.address}"
 
+
+    
+
+
+
+
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class UserAction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    action_type = models.CharField(max_length=50, choices=ACTION_TYPES)
+    description = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} performed {self.action_type} at {self.timestamp}"

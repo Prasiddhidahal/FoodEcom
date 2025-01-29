@@ -1,0 +1,12 @@
+{% load humanize %}
+
+<h2>Recent actions</h2>
+<ul>
+    {% for action in actions %}
+        <li>
+            <strong>{{ action.user.username }}</strong> 
+            {{ action.get_action_type_display }}: {{ action.description }} 
+            <small>{{ action.timestamp|naturaltime }}</small>
+        </li>
+    {% endfor %}
+</ul>

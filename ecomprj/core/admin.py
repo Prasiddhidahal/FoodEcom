@@ -1,11 +1,30 @@
 from django.contrib import admin
-from core.models import Product, Category, Vendor, CartOrder, CartOrderItems, ProductImages, ProductReview, Wishlist, Address,Tags,  CategoryImage
+from core.models import Ad, Adimage, Product, Category, Vendor, CartOrder, CartOrderItems, ProductImages, ProductReview, Wishlist, Address,Tags,  CategoryImage, Navbar
 
-# Inline model for displaying product images within the product admin view
+
+@admin.register(Navbar)
+class NavbarAdmin(admin.ModelAdmin):
+    list_display = ('title', 'url', 'status')  # Display these fields in the list view
+    list_filter = ('status',)  # Add a filter for status
+    search_fields = ('title', 'url')  # Add search functionality for title and url
+    ordering = ('order',)  # Optionally, add ordering by title
+
 class ProductImagesAdmin(admin.TabularInline):
     model = ProductImages
 
-# Admin class for managing Product model in the admin interface
+class AdImageInline(admin.TabularInline):
+    model = Adimage
+    extra = 1  # Number of empty forms to display initially
+
+# ModelAdmin for Ad
+class AdAdmin(admin.ModelAdmin):
+    list_display = ('image', 'status')
+    list_filter = ('status',)
+    search_fields = ('image', 'status')
+    inlines = [AdImageInline]  
+
+# Register the Ad model with the admin site
+admin.site.register(Ad, AdAdmin)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'price', 'category', 'stock_status', 'in_stock', 'stock_quantity', 'vendor')
     list_filter = ('category', 'vendor')
@@ -34,7 +53,16 @@ class CartOrderAdmin(admin.ModelAdmin):
 class AddressesAdmin(admin.ModelAdmin):
     list_editable = ['address', 'status']
     list_display = ['user', 'address', 'status']
+# @admin.register(ActivityLog)
 
+
+# class NotificationAdmin(admin.ModelAdmin):
+#     list_display = ('user', 'message', 'is_read', 'timestamp')
+#     list_filter = ('is_read', 'timestamp')
+#     search_fields = ('user__username', 'message')
+
+#     class Meta:
+#         model = Notification
 # Register the models with their respective admin classes
 
 admin.site.register(Category, CategoryAdmin)
@@ -47,3 +75,7 @@ admin.site.register(Tags)
 admin.site.register(ProductImages)
 admin.site.register(Product, ProductAdmin)
 admin.site.register(ProductReview)
+
+
+
+# admin.site.register(ActivityLog)

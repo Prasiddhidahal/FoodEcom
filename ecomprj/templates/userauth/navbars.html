@@ -1,0 +1,145 @@
+{% extends "partials/baseadmin.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2 class="page-title">Navbar Items</h2>
+    
+    <ul class="navbar-list">
+        {% for navbar in navbars %}
+            <li class="navbar-item">
+                <div class="navbar-item-content">
+                    <a href="{% url 'userauth:navbar_view' navbar.id %}" class="navbar-link">{{ navbar.title }}</a> - 
+                    <a href="{% url 'userauth:navbar_edit' navbar.id %}" class="edit-link">Edit</a> - 
+                    <form action="{% url 'userauth:navbar_delete' navbar.id %}" method="POST" class="delete-form">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2 class="add-navbar-title">Add Navbar Item</h2>
+    <form method="POST" class="add-navbar-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="add-navbar-button">Add Navbar</button>
+    </form>
+</div>
+
+<style>
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .navbar-actions {
+        margin-bottom: 20px;
+    }
+
+    .view-button {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 16px;
+        display: inline-block;
+    }
+
+    .view-button:hover {
+        background-color: #218838;
+    }
+
+    .navbar-list {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 30px;
+    }
+
+    .navbar-item {
+        margin-bottom: 15px;
+        font-size: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .navbar-item-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .navbar-link {
+        text-decoration: none;
+        color: #007bff;
+        font-weight: bold;
+    }
+
+    .navbar-link:hover {
+        text-decoration: underline;
+    }
+
+    .edit-link {
+        color: #28a745;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .edit-link:hover {
+        text-decoration: underline;
+    }
+
+    .delete-form {
+        display: inline;
+    }
+
+    .delete-button {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 16px;
+        border-radius: 4px;
+    }
+
+    .delete-button:hover {
+        background-color: #c82333;
+    }
+
+    .add-navbar-title {
+        font-size: 22px;
+        margin-top: 30px;
+        margin-bottom: 10px;
+    }
+
+    .add-navbar-form {
+        margin-bottom: 20px;
+    }
+
+    .add-navbar-button {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 15px;
+        font-size: 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .add-navbar-button:hover {
+        background-color: #0056b3;
+    }
+</style>
+{% endblock %}

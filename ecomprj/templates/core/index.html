@@ -18,6 +18,44 @@
         </div>
     </div>
 </section>
+
+
+<div id="advertisement-slider" class="advertisement-slider">
+    {% if ads %}
+        <div class="slider">
+            {% for ad in ads %}
+                
+                <img src="{{ ad.image.url }}" alt="{{ ad.status }}">
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No advertisements available</p>
+    {% endif %}
+</div>
+<style>
+    .advertisement-slider {
+        position: relative;
+        width: 100%;
+        height: 300px; /* Adjust as per your design */
+        overflow: hidden;
+    }
+
+    .slider {
+        display: flex;
+    }
+
+    .slider-item {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    .slider-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
     <!-- Hero Section Begin -->
     <section class="featured spad">
         <div class="container">
@@ -174,6 +212,49 @@
 </section>
 
     <!-- Latest Product Section End -->
+<section id="on-sale-products">
+    <h2>On Sale Products</h2>
+    <div class="product-list">
+        {% for product in in_sale %}
+            <div class="product">
+                <a href="{% url 'core:pages1' product.pid %}">
+                    <img src="{{ product.image.url }}" alt="{{ product.title }}" width="150" height="150">
+                </a>
+                <h3>{{ product.title }}</h3>
+                <p>Old Price: <del>{{ product.old_price }}</del></p>
+                <p>Sale Price: {{ product.price }}</p>
+                {% if product.in_sale %}
+                    <span class="sale-badge">On Sale!</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<style>
+    .sale-badge {
+    background-color: #ff6347;
+    color: white;
+    padding: 5px;
+    font-size: 12px;
+    border-radius: 3px;
+}
+
+</style>
+
+
+<div id="advertisement-slider" class="advertisement-slider">
+    {% if ads %}
+        <div class="slider">
+            {% for ad in ads2 %}
+                
+                <img src="{{ ad.image.url }}" alt="{{ ad.status }}">
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No advertisements available</p>
+    {% endif %}
+</div>
 
     <!-- Blog Section Begin -->
     <section class="from-blog spad">
