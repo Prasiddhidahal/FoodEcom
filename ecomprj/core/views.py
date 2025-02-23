@@ -173,8 +173,9 @@ def index(request):
     navbars = Navbar.objects.filter(status='Active').order_by('order')
     
     # Fetch active advertisements
-    ads = Ad.objects.filter(status='Active').prefetch_related('images')  [:1]
-    ads2 = Ad.objects.filter(	status='Active').prefetch_related('images')[1:]
+    ads = Ad.objects.filter(status='Active').prefetch_related('images')[:1]
+    ads2 = Ad.objects.filter(status='Active').prefetch_related('images')[1:]
+
     
     context = {
         'products': products,

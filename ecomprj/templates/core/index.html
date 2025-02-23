@@ -243,18 +243,22 @@
 </style>
 
 
+
 <div id="advertisement-slider" class="advertisement-slider">
-    {% if ads %}
+    {% if ads2 %}
         <div class="slider">
             {% for ad in ads2 %}
-                
-                <img src="{{ ad.image.url }}" alt="{{ ad.status }}">
+                    <img src="{{ ad.image.url }}" alt="{{ ad.status }}">
             {% endfor %}
         </div>
     {% else %}
         <p>No advertisements available</p>
     {% endif %}
 </div>
+
+
+
+
 
     <!-- Blog Section Begin -->
     <section class="from-blog spad">
