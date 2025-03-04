@@ -1,0 +1,22 @@
+{% extends "partials/baseadmin.html" %}
+{% load static %}
+
+{% block content %}
+<div class="footer-detail-container">
+    <h2 class="footer-title">{{ footer.title }}</h2>
+    <div class="footer-info">
+        <p><strong>URL:</strong> {{ footer.url }}</p>
+        <p><strong>Status:</strong> {{ footer.status }}</p>
+        <p><strong>Created:</strong> {{ footer.created_by }}</p>
+    </div>
+    <a href="{% url 'userauth:footers' %}" class="back-button">Back to Footer List</a>
+</div>
+
+<style>
+    .footer-detail-container { max-width: 800px; margin: 20px auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px; }
+    .footer-title { font-size: 28px; font-weight: bold; margin-bottom: 15px; }
+    .footer-info { font-size: 18px; color: #555; }
+    .back-button { background-color: #007bff; color: white; padding: 10px 15px; border-radius: 4px; }
+    .back-button:hover { background-color: #0056b3; }
+</style>
+{% endblock %}

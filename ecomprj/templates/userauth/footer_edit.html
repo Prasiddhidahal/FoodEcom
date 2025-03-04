@@ -1,0 +1,24 @@
+{% extends "partials/baseadmin.html" %}
+{% load static %}
+
+{% block content %}
+<div class="edit-footer-container">
+    <h2 class="edit-footer-title">Edit Footer Item</h2>
+    <form method="POST" class="edit-footer-form">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+        <button type="submit" class="submit-button">Save Changes</button>
+    </form>
+
+    <a href="{% url 'userauth:footers' %}" class="cancel-button">Cancel</a>
+</div>
+
+<style>
+    .edit-footer-container { max-width: 800px; margin: 30px auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px; }
+    .edit-footer-title { font-size: 28px; font-weight: bold; margin-bottom: 20px; }
+    .submit-button { background-color: #007bff; color: white; padding: 10px 15px; border-radius: 4px; }
+    .cancel-button { background-color: #dc3545; color: white; padding: 10px 15px; border-radius: 4px; }
+</style>
+{% endblock %}

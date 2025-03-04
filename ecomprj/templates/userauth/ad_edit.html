@@ -1,16 +1,126 @@
 {% extends 'partials/baseadmin.html' %}
 
 {% block content %}
-<h2>Edit Ad</h2>
+<h2 class="form-title">Edit Ad</h2>
 
-<form method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data" class="edit-ad-form">
     {% csrf_token %}
-    {{ ad_form.as_p }}
-    
-     {% comment %} {% if ad_image_form.instance.image %}
-        <img src="{{ ad_image_form.instance.image.url }}" width="100" />
-    {% endif %}  {% endcomment %}
-    
-    <button type="submit">Save Changes</button>
+    <div class="form-group">
+        {{ ad_form.as_p }}
+    </div>
+
+    {% if ad_image_form.instance.image %}
+    <div class="form-group image-preview">
+        <label>Current Image:</label>
+        <img src="{{ ad_image_form.instance.image.url }}" alt="Current Ad Image" class="preview-image">
+    </div>
+    {% endif %}
+
+    <button type="submit" class="save-btn">Save Changes</button>
 </form>
+
+<style>
+/* General form styles */
+.form-title {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.edit-ad-form {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+/* Form field styles */
+.form-group {
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 16px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="file"],
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+textarea {
+    height: 120px;
+}
+
+/* Image preview styles */
+.image-preview {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.preview-image {
+    max-width: 100px;
+    height: auto;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    object-fit: cover;
+}
+
+/* Button styles */
+.save-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background-color: #27ae60;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.save-btn:hover {
+    background-color: #219150;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+    .edit-ad-form {
+        padding: 15px;
+    }
+
+    input[type="text"],
+    input[type="file"],
+    textarea,
+    select {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .save-btn {
+        padding: 10px;
+        font-size: 14px;
+    }
+}
+</style>
+
 {% endblock %}
+

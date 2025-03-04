@@ -1,11 +1,27 @@
-{% extends "admin/base_site.html" %}
+{% extends "partials/baseadmin.html" %}
 {% load static %}
 {% block content %}
 <div class="container mx-auto px-6 py-6">
     <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+
+        <!-- Header -->
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-800">Activity Log</h1>
         </div>
+
+        <!-- Messages Section -->
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Activity Log Table -->
         <div class="overflow-x-auto bg-white rounded-lg shadow-lg mt-6">
             <table class="table-auto w-full text-left border-collapse border border-gray-200">
                 <thead class="bg-gray-50">
@@ -16,16 +32,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for log in logs %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 border border-gray-200">{{ log.user }}</td>
-                        <td class="px-6 py-4 border border-gray-200">{{ log.action }}</td>
-                        <td class="px-6 py-4 border border-gray-200">{{ log.date }}</td>
-                    </tr>
-                    {% endfor %}
+                    {% if logs %}
+                        {% for log in logs %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 border border-gray-200">{{ log.user }}</td>
+                                <td class="px-6 py-4 border border-gray-200">{{ log.action }}</td>
+                                <td class="px-6 py-4 border border-gray-200">{{ log.date }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="px-6 py-4 text-center text-gray-500">No activity logs found.</td>
+                        </tr>
+                    {% endif %}
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 {% endblock %}
+

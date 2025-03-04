@@ -2,18 +2,25 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from .models import User
 from django import forms
-from core.models import  CartOrder, CartOrderItems, Category, Product, ProductReview, Vendor, Wishlist, Address
+from core.models import  About_company, CartOrder, CartOrderItems, Category, Product, ProductReview, Vendor, Wishlist, Address
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User, Group, Permission
 
 
 User = get_user_model()
-from core.models import Navbar
+from core.models import Navbar, Footer
 
 class NavbarForm(forms.ModelForm):
     class Meta:
         model = Navbar
         fields = ['title', 'url', 'status', 'order', 'parent', 'created_by']
+
+class FooterForm(forms.ModelForm):
+    class Meta:
+        model = Footer
+        fields = ['title', 'url', 'status', 'order', 'parent', 'created_by', 'logo']
+
+
 from core.models import Ad, Adimage
 
 # Form for the Ad model
@@ -40,6 +47,18 @@ class CategoryForm(forms.ModelForm):
         model = Category
         fields = ['title', 'image']
 
+from django import forms
+from core.models import Slider
+
+class SliderForm(forms.ModelForm):
+    class Meta:
+        model = Slider
+        fields = ['title',  'image', 'description', 'updated_by', 'status']  
+
+class About_companyForm(forms.ModelForm):
+    class Meta:
+        model = About_company
+        fields = ['title', 'description', 'image', 'updated_by']
 
 class ProductForm(forms.ModelForm):
     class Meta:

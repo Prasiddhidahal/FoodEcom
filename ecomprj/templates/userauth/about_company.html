@@ -1,0 +1,48 @@
+{% extends "partials/baseadmin.html" %}
+{% load static %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Company</title>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>About the Company</h1>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <div class="company-info">
+            <!-- Title -->
+            <h2>{{ form.title.value }}</h2>
+
+            <!-- Description -->
+            <p>{{ form.description.value }}</p>
+
+            <!-- Image -->
+            {% if form.image.value %}
+                <img src="{{ form.image.value.url }}" alt="Company Image" class="company-image">
+            {% else %}
+                <p>No image available</p>
+            {% endif %}
+        </div>
+
+
+        <div class="form-group">
+            <a href="{% url 'userauth:about_company_edit' %}" class="btn btn-secondary">Edit About Company</a>
+        </div>
+    </div>
+</body>
+</html>
+
+{%endblock%}

@@ -3,21 +3,21 @@ from profile import Profile
 from django.forms import modelformset_factory
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
-from .forms import  AdForm, AdImageForm, AssignRoleForm, CategoryForm, CreateRoleForm, ProductForm, UserRegisterForm
+from .forms import  About_companyForm, AdForm, AdImageForm, AssignRoleForm, CategoryForm, CreateRoleForm, FooterForm, ProductForm, UserRegisterForm
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_protect
-from django.contrib.auth import get_user_model, logout  # Correct way to reference the user model
+from django.contrib.auth import get_user_model, logout  
 from django.contrib.auth.decorators import login_required
 from .decorators import allowed_users
 from django.utils import timezone
 from django.db.models import Count
 from django.db.models.functions import TruncHour
-from core.models import  Ad, Address, CartOrderItems, Category, Vendor, Product, CartOrder
+from core.models import  About_company, Ad, Address, CartOrderItems, Category, Footer, Slider, Vendor, Product, CartOrder
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncMonth
 from django.db.models import Sum
-import calendar  # Ensure this is imported at the top
+import calendar  
 from django.db.models.functions import ExtractMonth
 from django.db.models import Count
 from django.contrib import messages
@@ -27,13 +27,21 @@ from .forms import ProductEditForm
 from django.contrib.auth.models import Group, Permission
 from .forms import GroupPermissionForm
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.signals import user_logged_in, user_logged_out
+# from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
 from core.models import UserAction, Navbar
 from .forms import NavbarForm
-
-
-User = get_user_model()  # Correctly retrieve the user model
+from .forms import OrderEditForm
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseNotAllowed
+from core.models import Ad
+from django.contrib import messages
+from core.models import Ad, Adimage
+from .forms import AdForm, AdImageForm 
+from django.contrib.auth.models import Group, Permission
+from .forms import GroupPermissionForm
+from django.db.models import Count, Avg
+User = get_user_model()  
 
 @csrf_protect
 def register_user(request):
@@ -48,17 +56,16 @@ def register_user(request):
             messages.success(request, f'Account created for {usernames}!')
 
             # Authenticate the new user
-            new_user = authenticate(username=form.cleaned_data['email'],  # Authenticate by email
+            new_user = authenticate(username=form.cleaned_data['email'],  
                                     password=form.cleaned_data['password1'])
 
-            # Log in the user and redirect
+            
             if new_user is not None:
                 login(request, new_user)
-                return redirect('core:index')  # Redirect to home page after registration
+                return redirect('core:index')  
     else:
         form = UserRegisterForm()
 
-    # Pass form to template context
     context = {
         'form': form,
     }
@@ -66,40 +73,32 @@ def register_user(request):
 
 @csrf_protect
 def user_login(request):
-    # If the user is already authenticated, redirect them to the homepage
     if request.user.is_authenticated:
         messages.success(request, "You are already logged in.")
         return redirect('core:index')
 
-    # Handle POST request to login the user
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
 
-        # Try to retrieve the user based on the email
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             messages.warning(request, f'No user found with the email {email}. Please try again.')
             return render(request, "userauth/login.html")
 
-        # Authenticate the user using username (email is mapped to username in this case)
         user = authenticate(request, username=user.username, password=password)
 
-        # If authentication is successful, log the user in and redirect to the homepage
         if user is not None:
             login(request, user)
             messages.success(request, "You are logged in.")
             return redirect("core:index")
         else:
-            # If authentication fails, show an error message
             messages.warning(request, "Incorrect password. Please try again.")
 
-    # Return the login page if it's not a POST request
     return render(request, "userauth/login.html")
 
 def user_logout(request):
-    # Check if the user is authenticated before logging out
     if request.user.is_authenticated:
         logout(request)
         messages.success(request, "You have successfully logged out.")
@@ -108,35 +107,27 @@ def user_logout(request):
     
     return redirect('userauth:login')
 
-
-
+from django.db.models import Max
+#start of admin pages
+#admin dashboard
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Editor'])
 
 def admindashboard(request):
-    # Restrict access to superusers only
-    # if not request.user.is_superuser:
-    #     return redirect('userauth:unauthorized')
-
-    # Get all orders (remove user=request.user if admin should see all orders)
     orders_list = CartOrder.objects.all().order_by("-id")
     add = Address.objects.filter(user=request.user)
-
-    # Calculate Total Sales Today (for all orders)
     total_sales_today = (
         CartOrder.objects.filter(order_date__date=timezone.now().date())
         .aggregate(total=Sum('price'))['total'] or 0
     )
-
-    # Calculate Current Month Sales (for all orders)
     current_month = timezone.now().month
     current_month_sales = (
         CartOrder.objects.filter(order_date__month=current_month)
         .aggregate(total=Sum('price'))['total'] or 0
     )
-
-    # Calculate Average Monthly Sales (for all orders)
+    
+    # Calculated Average Monthly Sales 
     monthly_sales = (
         CartOrder.objects.annotate(month=ExtractMonth("order_date"))
         .values("month")
@@ -145,7 +136,7 @@ def admindashboard(request):
     )
     average_sales = sum(monthly_sales) / len(monthly_sales) if monthly_sales else 0
 
-    # Prepare data for the chart
+    # Prepared data for the chart
     orders = (
         CartOrder.objects.annotate(month=ExtractMonth("order_date"))
         .values('month')
@@ -155,11 +146,10 @@ def admindashboard(request):
     month = []
     total_orders = []
     for order in orders:
-        month_name = calendar.month_name[order['month']]  # Correct usage of calendar.month_name
+        month_name = calendar.month_name[order['month']] 
         month.append(month_name)
         total_orders.append(order['count'])
 
-    # Handle adding a new address
     if request.method == "POST":
         address = request.POST.get("address")
         mobile = request.POST.get("mobile")
@@ -169,7 +159,10 @@ def admindashboard(request):
             mobile=mobile
         )
         messages.success(request, "Address Added Successfully")
-
+    
+    top_rated_products = Product.objects.annotate(average_rating=Avg('reviews__rating')).order_by('-average_rating')[:5]
+    
+    top_selling_products = Product.objects.order_by('-sold_quantity')[:5]
     context = {
         "orders_list": orders_list,
         "orders": orders,
@@ -179,78 +172,11 @@ def admindashboard(request):
         "total_sales_today": total_sales_today,
         "current_month_sales": current_month_sales,
         "average_sales": average_sales,
+        'top_rated_products': top_rated_products,
+        'top_selling_products': top_selling_products,
     }
-    
-
     return render(request, 'userauth/admindashboard.html', context, 
     )
-
-
-@csrf_protect
-@login_required
-@allowed_users(allowed_roles=['Admin'])
-def vendor_management(request):
-    if not request.user.is_superuser:
-        return redirect('userauth:unauthorized')
-    vendors = Vendor.objects.all()
-    return render(request, 'userauth/vendor_management.html', {'vendors': vendors})
-
-
-@csrf_protect
-@login_required
-@allowed_users(allowed_roles=['Admin'])
-def delete_vendor(request, vendor_id):
-    vendor = get_object_or_404(Vendor, id=vendor_id)
-    vendor.delete()
-    return redirect('userauth:vendor_management')
-
-
-@csrf_protect
-@login_required
-@allowed_users(allowed_roles=['Admin'])
-def edit_vendor(request, vendor_id):
-    vendor = get_object_or_404(Vendor, id=vendor_id)
-    if request.method == 'POST':
-        vendor.title = request.POST['title']
-        vendor.email = request.POST['email']
-        vendor.phone = request.POST['phone']
-        vendor.save()
-        return redirect(reverse('vendor:vendor_management'))
-    return render(request, 'userauth/edit_vendor.html', {'vendor': vendor})
-
-
-@csrf_protect
-@login_required
-def product_management(request):
-    if not request.user.is_superuser:
-        return redirect('userauth:unauthorized')
-    products = Product.objects.all()
-    return render(request, 'userauth/product_management.html', {'products': products})
-
-
-@csrf_protect
-@login_required
-@allowed_users(allowed_roles=['Admin'])
-def delete_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    product.delete()
-    return redirect('userauth:product_management')
-
-
-@csrf_protect
-@login_required
-@allowed_users(allowed_roles=['Admin'])
-def edit_product(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    if request.method == 'POST':
-        product.title = request.POST['title']
-        product.price = request.POST['price']
-        product.stock_quantity = request.POST['stock_quantity']
-        
-        product.save()
-        return redirect(reverse('vendor:product_management'))
-    return render(request, 'userauth/edit_product.html', {'product': product})
-
 
 @csrf_protect
 @login_required
@@ -262,12 +188,11 @@ def unauthorized(request):
 def products(request):
     return render(request, 'userauth/products.html')
 
+#order 
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def orders(request):
-    # if not request.user.is_superuser:
-    #     return redirect('userauth:unauthorized')
     orders = CartOrder.objects.all()
     return render(request, 'userauth/orders.html', {'orders': orders})
 
@@ -278,37 +203,31 @@ def order_view(request, order_id):
     }
     return render(request, 'userauth/order_view.html', context)
 
-from .forms import OrderEditForm
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def order_edit(request, order_id):
-    # Fetch the order to be edited
     order = get_object_or_404(CartOrder, id=order_id)
-    
-    # Get the cart items for the current order
-    cart_items = CartOrderItems.objects.filter(order=order)  # Assuming CartItem has a ForeignKey to CartOrder
-    
-    # Calculate total number of items ordered by summing the quantities of cart items
+    cart_items = CartOrderItems.objects.filter(order=order)  
     total_items_ordered = sum(item.qty for item in cart_items)
     
     # If the form is being submitted
     if request.method == 'POST':
         form = OrderEditForm(request.POST, instance=order)
         if form.is_valid():
-            form.save()  # Save the updated order
-            return redirect('userauth:orders')  # Redirect to view page after saving
+            form.save() 
+            return redirect('userauth:orders')  
     else:
-        form = OrderEditForm(instance=order)  # Pre-fill form with current order data
+        form = OrderEditForm(instance=order)  
     
     context = {
         'form': form,
         'order': order,
-        'cart_items': cart_items,  # Pass cart items to the template
-        'total_items_ordered': total_items_ordered,  # Pass the total number of items ordered
+        'cart_items': cart_items,  
+        'total_items_ordered': total_items_ordered,  
     }
-
     return render(request, 'userauth/order_edit.html', context)
+
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin'])
@@ -318,33 +237,28 @@ def order_delete(request, order_id):
         order.delete()
         return redirect('userauth:orders')
     return HttpResponseNotAllowed(['POST'])
+
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def customer_orders(request):
-    # Get all users who have placed orders
     users = User.objects.all()
-    
-    # Initialize a list to store customer order details
     customer_orders = []
-    
-    # Loop through users and get their orders and address
+
     for user in users:
         orders = CartOrder.objects.filter(user=user).order_by('-order_date')
-        address = Address.objects.filter(user=user).first()  # Get the user's address (if it exists)
-        
-        # Only add customers who have orders
+        address = Address.objects.filter(user=user).first()  
+
         if orders:
             customer_orders.append({
                 'user': user,
                 'orders': orders,
-                'address': address  # Add address to the context
+                'address': address  
             })
 
     context = {
         'customer_orders': customer_orders
     }
-
     return render(request, 'userauth/customer.html', context)
 
 @csrf_protect
@@ -368,9 +282,7 @@ def customer_order_details(request, user_id):
 def add_product(request):
     return render(request, 'userauth/add_product.html')
 
-
-
-
+#category
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin', 'Editor'])
@@ -378,28 +290,22 @@ def add_product(request):
 def category_list(request):
     categories = Category.objects.all()
 
-    # Handling the form submission for creating new category
     if request.method == 'POST':
         title = request.POST.get('title')
         image = request.FILES.get('image')
 
-        # Create and save the new category
         new_category = Category.objects.create(
             title=title,
             image=image
         )
-        # Redirect to the category list page after adding the new category
-        return redirect('userauth:category_list')  # Use URL name instead of a direct file reference
-
+        return redirect('userauth:category_list') 
     return render(request, 'userauth/categories.html', {'categories': categories})
 
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def category_detail(request, category_id):
-    # Get the category by ID
     category = get_object_or_404(Category, id=category_id)
-    # Get all products in this category using the correct related_name
     products = category.products.all()
     return render(request, 'userauth/category_detail.html', {'category': category, 'products': products})
 
@@ -407,7 +313,7 @@ def category_delete(request, id):
     category = get_object_or_404(Category, id=id)
     if request.method == 'POST':
         category.delete()
-        return redirect('userauth:category_list')  # Redirect to the categories list page
+        return redirect('userauth:category_list') 
     return HttpResponseNotAllowed(['POST'])
 def category_edit(request, id):
     category = get_object_or_404(Category, id=id)
@@ -415,32 +321,28 @@ def category_edit(request, id):
         form = CategoryForm(request.POST, request.FILES, instance=category)
         if form.is_valid():
             form.save()
-            return redirect('userauth:category_list')  # Redirect to categories list page
+            return redirect('userauth:category_list')  
     else:
         form = CategoryForm(instance=category)
     return render(request, 'userauth/category_edit.html', {'form': form, 'category': category})
 
+#products
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def products(request):
-    # Get all products
     products = Product.objects.all()
 
-    # Handle form submission for creating new product
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
-            product = form.save(commit=False)  # Don't save to the database yet
-            product.updated_by = request.User  # Set updated_by to the current user
-            product.save()  # Now save to the database
-            return redirect('userauth:products')  # Redirect to the product list after saving
-
+            product = form.save(commit=False)  
+            product.updated_by = request.user  
+            product.save() 
+            return redirect('userauth:products')   
     else:
         form = ProductForm()
-
     return render(request, 'userauth/products.html', {'products': products, 'form': form})
-
 
 @csrf_protect
 @login_required
@@ -461,10 +363,10 @@ def product_edit(request, product_id):
     if request.method == 'POST':
         form = ProductEditForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
-            form.save()  # Save the updated product
-            return redirect('userauth:products')  # Redirect to products list after saving
+            form.save()  
+            return redirect('userauth:products')  
     else:
-        form = ProductEditForm(instance=product)  # Pre-fill form with current product data
+        form = ProductEditForm(instance=product)  
     
     context = {
         'form': form,
@@ -483,24 +385,21 @@ def product_delete(request, product_id):
         return redirect('userauth:products')
     return HttpResponseNotAllowed(['POST'])
 
+#dymanic navbar
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin'])
 def navbars(request):
-    # Get all navbars
     navbars = Navbar.objects.all()
 
-    # Handle form submission for creating a new navbar item
     if request.method == 'POST':
         form = NavbarForm(request.POST)
         if form.is_valid():
-            form.save()  # Save the new navbar item
-            return redirect('userauth:navbars')  # Redirect to the navbar list after saving
+            form.save()  
+            return redirect('userauth:navbars')  
     else:
         form = NavbarForm()
-
     return render(request, 'userauth/navbars.html', {'navbars': navbars, 'form': form})
-
 
 @csrf_protect
 @login_required
@@ -508,7 +407,6 @@ def navbars(request):
 def navbar_view(request, navbar_id):
     navbar = get_object_or_404(Navbar, id=navbar_id)
     return render(request, 'userauth/navbar_view.html', {'navbar': navbar})
-
 
 @csrf_protect
 @login_required
@@ -519,10 +417,10 @@ def navbar_edit(request, navbar_id):
     if request.method == 'POST':
         form = NavbarForm(request.POST, instance=navbar)
         if form.is_valid():
-            form.save()  # Save the updated navbar item
-            return redirect('userauth:navbars')  # Redirect to navbar list after saving
+            form.save()  
+            return redirect('userauth:navbars') 
     else:
-        form = NavbarForm(instance=navbar)  # Pre-fill form with current navbar data
+        form = NavbarForm(instance=navbar)  
 
     return render(request, 'userauth/navbar_edit.html', {'form': form, 'navbar': navbar})
 
@@ -536,6 +434,8 @@ def navbar_delete(request, navbar_id):
         navbar.delete()
         return redirect('userauth:navbars')
     return HttpResponseNotAllowed(['POST'])
+
+#roles
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin'])
@@ -544,18 +444,18 @@ def manage_roles(request):
         assign_role_form = AssignRoleForm(request.POST)
         create_role_form = CreateRoleForm(request.POST)
 
-        if 'create_role' in request.POST:  # If Create Role button is pressed
+        if 'create_role' in request.POST:  
             if create_role_form.is_valid():
                 role_name = create_role_form.cleaned_data['role_name']
-                group = Group.objects.create(name=role_name)  # Create the new group
-                return redirect('userauth:manage_roles')  # Redirect to refresh the page and show the new role
+                group = Group.objects.create(name=role_name)  
+                return redirect('userauth:manage_roles')  
 
-        elif 'assign_role' in request.POST:  # If Assign Role button is pressed
+        elif 'assign_role' in request.POST: 
             if assign_role_form.is_valid():
                 user = assign_role_form.cleaned_data['user']
                 group = assign_role_form.cleaned_data['group']
-                user.groups.add(group)  # Assign the selected group to the user
-                return redirect('userauth:manage_roles')  # Redirect to refresh the page
+                user.groups.add(group) 
+                return redirect('userauth:manage_roles')  
 
     else:
         assign_role_form = AssignRoleForm()
@@ -566,64 +466,36 @@ def manage_roles(request):
         'create_role_form': create_role_form,
     })
 
-
-
-# def advertisement(request):
-#     # Fetch all advertisements
-#     advertisement = Advertisement.objects.all()
-
-#     context = {
-#         'advertisement': advertisement,
-#     }
-
-#     return render(request, 'userauth/advertisement.html', context)
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseNotAllowed
-from core.models import Ad
-from django.contrib import messages
-from core.models import Ad, Adimage  # Import your models
-from .forms import AdForm, AdImageForm  # Import your forms
+#ads
 def ad_list(request):
     ads = Ad.objects.all()
     return render(request, 'userauth/ad_list.html', {'ad': ads})
 
-
-# Edit an ad (change image or status)from django.shortcuts import render, get_object_or_404, redirect
-
-
 def ad_edit(request, ad_id):
     ad = get_object_or_404(Ad, id=ad_id)
-
-    # Fetch all images related to the ad
-    ad_images = ad.images.all()  # Using related_name 'images' from Adimage model
+    ad_images = ad.images.all()  
 
     if request.method == 'POST':
-        # Handle Ad form and AdImage form separately
-        ad_form = AdForm(request.POST, request.FILES, instance=ad)  # For updating Ad (status, image, etc.)
-        ad_image_form = AdImageForm(request.POST, request.FILES)  # For uploading new images
+        ad_form = AdForm(request.POST, request.FILES, instance=ad) 
+        ad_image_form = AdImageForm(request.POST, request.FILES)  
 
-        # Validate Ad form first
         if ad_form.is_valid():
-            ad_form.save()  # Save the Ad form
+            ad_form.save() 
 
-            # Now handle the AdImageForm separately for new image uploads
             if ad_image_form.is_valid() and 'image' in request.FILES:
                 new_ad_image = ad_image_form.save(commit=False)
-                new_ad_image.Ad = ad  # Link new image to the Ad
+                new_ad_image.Ad = ad  
                 new_ad_image.save()
 
             messages.success(request, 'Ad updated successfully!')
             return redirect('userauth:ad_list')
 
         else:
-            # Handle errors for Ad form and AdImage form
             messages.error(request, 'There was an error updating the Ad. Please check the form data.')
-            print(ad_form.errors)  # Debugging: Print form errors
-            print(ad_image_form.errors)  # Debugging: Print image form errors
+            print(ad_form.errors)  
+            print(ad_image_form.errors) 
 
     else:
-        # Prepopulate the forms with existing data
         ad_form = AdForm(instance=ad)
         ad_image_form = AdImageForm()
 
@@ -631,33 +503,48 @@ def ad_edit(request, ad_id):
         'ad_form': ad_form,
         'ad_image_form': ad_image_form,
         'ad': ad,
-        'ad_images': ad_images,  # Pass existing images to the template
+        'ad_images': ad_images,  
+    })
+
+#slidersfrom django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from core.models import Slider
+from userauth.forms import SliderForm  # Ensure you have a form to handle slider edits
+from userauth.decorators import allowed_users  # Ensure this decorator exists
+
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def slider_list(request):
+    sliders = Slider.objects.all()[:4]  # Limit to 4 sliders
+    return render(request, 'userauth/slider_list.html', {'sliders': sliders})
+
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def slider_edit(request, slider_id):
+    slider = get_object_or_404(Slider, id=slider_id)
+    
+    if request.method == 'POST':
+        slider_form = SliderForm(request.POST, request.FILES, instance=slider)  # Handle slider form with image
+
+        if slider_form.is_valid():
+            slider_form.save()  # Save the updated slider
+            messages.success(request, 'Slider updated successfully!')
+            return redirect('userauth:slider_list')
+        else:
+            messages.error(request, 'There was an error updating the slider. Please check the form data.')
+
+    else:
+        slider_form = SliderForm(instance=slider)  # Prepopulate form with the existing slider
+
+    return render(request, 'userauth/slider_edit.html', {
+        'slider_form': slider_form,
+        'slider': slider,
     })
 
 
-
-# Delete an ad
-def ad_delete(request, ad_id):
-    ad = get_object_or_404(Ad, id=ad_id)
-
-    if request.method == "POST":
-        ad.delete()  # Delete the ad and associated images
-        messages.success(request, 'Ad deleted successfully')
-        return redirect('userauth:ad_list')  # Ensure this is correct
-
-    return HttpResponseNotAllowed(['POST'])
-
-@csrf_protect
-# @allowed_users(allowed_roles=['Admin'])
-@login_required
-def edit_content(request):
-    if request.user.groups.filter(name='Editor').exists():
-        # Only editors can access this page
-        # Your logic here for editors
-        return render(request, 'userauth/edit_page.html')
-    else:
-        return HttpResponseForbidden("You do not have permission to edit.")
-    
+#manage group permissions  
 @csrf_protect
 @login_required
 @allowed_users(allowed_roles=['Admin'])
@@ -670,7 +557,7 @@ def manage_group_permissions(request):
         if form.is_valid():
             group = form.cleaned_data['group']
             permissions = form.cleaned_data['permissions']
-            group.permissions.set(permissions)  # Update group permissions
+            group.permissions.set(permissions)  
             group.save()
             return redirect('userauth/manage_group_permissions')
     else:
@@ -682,12 +569,14 @@ def manage_group_permissions(request):
         'form': form
     })
 
-
-
-@staff_member_required
+#activity view but isnt working
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
 def activity_log_view(request):
-    return redirect('admin:index')
+    return render(request, 'userauth/activity_log.html')
 
+#activity log tried but only login logout shown
 from django.db.models.signals import post_save, post_delete
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
@@ -746,8 +635,96 @@ def log_category_delete(sender, instance, **kwargs):
 
 
 def user_activity(request):
-    actions = UserAction.objects.all().order_by('-timestamp')  # Fetch all actions, ordered by timestamp (latest first)
+    actions = UserAction.objects.all().order_by('-timestamp')  
     context = {
         'actions': actions,
     }
     return render(request, 'userauth/user_activity.html', context)
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseNotAllowed
+from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth.decorators import login_required
+from .forms import FooterForm
+from core.models import Footer
+from .decorators import allowed_users
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def footers(request):
+    footers = Footer.objects.all()
+
+    if request.method == 'POST':
+        form = FooterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('userauth:footers')
+    else:
+        form = FooterForm()
+
+    return render(request, 'userauth/footer.html', {'footers': footers, 'form': form})
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def footer_view(request, footer_id):
+    footer = get_object_or_404(Footer, id=footer_id)
+    return render(request, 'userauth/footer_view.html', {'footer': footer})
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def footer_edit(request, footer_id):
+    footer = get_object_or_404(Footer, id=footer_id)
+
+    if request.method == 'POST':
+        form = FooterForm(request.POST, instance=footer)
+        if form.is_valid():
+            form.save()
+            return redirect('userauth:footers')
+    else:
+        form = FooterForm(instance=footer)
+
+    return render(request, 'userauth/footer_edit.html', {'form': form, 'footer': footer})
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def footer_delete(request, footer_id):
+    if request.method == "POST":
+        footer = get_object_or_404(Footer, id=footer_id)
+        footer.delete()
+        return redirect('userauth:footers')
+    return HttpResponseNotAllowed(['POST'])
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def about_company(request):
+    about_company = get_object_or_404(About_company, id=1)  # Assuming there's only one About Company record
+    if request.method == 'POST':
+        form = About_companyForm(request.POST, request.FILES, instance=about_company)
+        if form.is_valid():
+            form.save()
+            return redirect('userauth:about_company')
+    else:
+        form = About_companyForm(instance=about_company)
+    return render(request, 'userauth/about_company.html', {'form': form})
+
+
+@csrf_protect
+@login_required
+@allowed_users(allowed_roles=['Admin'])
+def about_company_edit(request):
+    about_company = get_object_or_404(About_company, id=1)  # Assuming there's only one "About Company" record
+    if request.method == 'POST':
+        form = About_companyForm(request.POST, request.FILES, instance=about_company)
+        if form.is_valid():
+            form.save()
+            return redirect('core:about_company')  # Redirect to the actual about page after edit
+    else:
+        form = About_companyForm(instance=about_company)
+    return render(request, 'userauth/edit_about_company.html', {'form': form})

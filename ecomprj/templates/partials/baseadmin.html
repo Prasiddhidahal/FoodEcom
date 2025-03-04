@@ -16,77 +16,132 @@
             <div class="p-6 bg-gray-800 text-white">
                 <h2 class="text-2xl font-bold">Admin Dashboard</h2>
             </div>
+            
+            <!-- Menu Sections -->
             <nav class="mt-6">
-                <ul>
-                    <li>
-                        <a href="{% url 'userauth:navbars' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-                            <span class="material-icons">Nav</span>
-                            <span class="ml-4">Navbar</span>
-                        </a>
-                    </li>
-                     <li>
-                        <a href="{% url 'userauth:ad_list' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-                            <span class="material-icons">Nav</span>
-                            <span class="ml-4">Advertisement</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'userauth:admindashboard' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-                            <span class="material-icons">dashboard</span>
-                            <span class="ml-4">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'userauth:orders' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-                            <span class="material-icons">list_alt</span>
-                            <span class="ml-4">Orders</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{% url 'userauth:products' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-                            <span class="material-icons">inventory</span>
-                            <span class="ml-4">Products</span>
-                        </a>
-                    </li>
-                    <li>
-    <a href="{% url 'userauth:customer_orders'  %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-        <span class="material-icons">people</span>
-        <span class="ml-4">Customers</span>
-    </a>
-</li>
-{% block sidebar %}
-    {{ block.super }}
-     <li>
-    <a href="{% url 'userauth:activity_log'  %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-        <span class="material-icons">history</span>
+                <!-- Dashboard Section -->
+                <section class="mb-4">
+                    <h3 class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-200">Dashboard Management</h3>
+                    <ul>
+                        <li>
+                            <a href="{% url 'userauth:admindashboard' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">dashboard</span>
+                                <span class="ml-4">Dashboard</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'userauth:orders' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">list_alt</span>
+                                <span class="ml-4">Orders</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+                <!-- General Section -->
+                <section class="mb-4">
+                    <h3 class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-200">Home</h3>
+                    <ul>
+                        <li>
+                            <a href="{% url 'userauth:navbars' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">menu</span>
+                                <span class="ml-4">Navbar</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'userauth:ad_list' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">campaign</span>
+                                <span class="ml-4">Advertisement</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'userauth:about_company' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                
 
-        <span class="ml-4">Activity Log</span>
-    </a>
-</li>
-{% endblock %}
-   <li>
-    <a href="{% url 'userauth:manage_roles'  %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-        <span class="material-icons">people</span>
-        <span class="ml-4">manage Roles</span>
-    </a>
-</li>   <li>
-    <a href="{% url 'userauth:manage_group_permissions'  %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-        <span class="material-icons">people</span>
-        <span class="ml-4">manage Permission</span>
-    </a>
-</li>
+                                <span class="material-icons">store</span>
+                                <span class="ml-4">About</span>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a href="{% url 'userauth:slider_list' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">campaign</span>
+                                <span class="ml-4">Slider</span>
+                            </a>
+                        </li>
                     <li>
-                       <a href="{% url 'userauth:category_list' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
-    <span class="material-icons">category</span>
-    <span class="ml-4">Categories</span>
-</a>
-                    </li>
-                </ul>
+                            <a href="{% url 'userauth:footers' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">home</span>
+                                <span class="ml-4">Footer</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+
+                
+
+                <!-- Product Section -->
+                <section class="mb-4">
+                    <h3 class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-200">Product Management</h3>
+                    <ul>
+                        <li>
+                            <a href="{% url 'userauth:products' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">inventory</span>
+                                <span class="ml-4">Products</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'userauth:category_list' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">category</span>
+                                <span class="ml-4">Categories</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Customer & Roles Section -->
+                <section class="mb-4">
+                    <h3 class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-200">User & Role Management</h3>
+                    <ul>
+                        <li>
+                            <a href="{% url 'userauth:customer_orders' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">people</span>
+                                <span class="ml-4">Customers</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'userauth:manage_roles' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">admin_panel_settings</span>
+                                <span class="ml-4">Manage Roles</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{% url 'userauth:manage_group_permissions' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">lock</span>
+                                <span class="ml-4">Manage Permissions</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Activity Log Section -->
+                <section class="mb-4">
+                    <h3 class="px-4 py-2 text-sm font-semibold text-gray-800 bg-gray-200">Activity Logs</h3>
+                    <ul>
+                        <li>
+                            <a href="{% url 'userauth:activity_log' %}" class="flex items-center p-4 text-gray-700 hover:bg-gray-200">
+                                <span class="material-icons">history</span>
+                                <span class="ml-4">Activity Log</span>
+                            </a>
+                        </li>
+                    </ul>
+                </section>
+
             </nav>
         </aside>
 
-       {% block content %}
-    
+        {% block content %}
         {% endblock %}
+    </div>
 </body>
 </html>
+

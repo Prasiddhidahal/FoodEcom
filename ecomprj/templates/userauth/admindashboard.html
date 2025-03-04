@@ -3,90 +3,163 @@
 
 {% block content %}
 
-
-        <!-- Main Content -->
-        <div class="flex-1 p-6">
-            <!-- Top Bar -->
-            <div class="flex justify-between mb-6">
-                <h1 class="text-2xl font-bold">Dashboard</h1>
-                <div class="flex items-center">
-                    <input type="text" placeholder="Search for products" class="border border-gray-300 rounded-md p-2">
-                    <div class="ml-4">
-                        <span class="font-bold">{{ request.user.username }}</span>
-                        <p class="text-sm">{{ request.user.get_full_name }}</p>
-                    </div>
-                    <img src="{{ request.user.profile.image.url }}" alt="User Photo" class="ml-4 w-12 h-12 rounded-full">
-                </div>
+<!-- Main Content -->
+<div class="flex-1 p-6">
+    <!-- Top Bar -->
+    <div class="flex justify-between mb-6">
+        <h1 class="text-2xl font-bold">Dashboard</h1>
+        <div class="flex items-center">
+            <input type="text" placeholder="Search for products" class="border border-gray-300 rounded-md p-2">
+            <div class="ml-4">
+                <span class="font-bold">{{ request.user.username }}</span>
+                <p class="text-sm">{{ request.user.get_full_name }}</p>
             </div>
+            <img src="{{ request.user.profile.image.url }}" alt="User Photo" class="ml-4 w-12 h-12 rounded-full">
+        </div>
+    </div>
 
-           <div class="grid grid-cols-3 gap-6">
-    <div class="bg-black text-white p-4 rounded-md">
-        <h3 class="text-lg">Total Sales Today</h3>
-        <p class="text-2xl font-bold">Rs. {{ total_sales_today }}</p>
+    <!-- Statistics Section -->
+    <div class="grid grid-cols-3 gap-6">
+        <div class="bg-black text-white p-4 rounded-md">
+            <h3 class="text-lg">Total Sales Today</h3>
+            <p class="text-2xl font-bold">Rs. {{ total_sales_today }}</p>
+        </div>
+        <div class="bg-black text-white p-4 rounded-md">
+            <h3 class="text-lg">Average Monthly Sales</h3>
+            <p class="text-2xl font-bold">Rs. {{ average_sales|floatformat:2 }}</p>
+        </div>
+        <div class="bg-black text-white p-4 rounded-md">
+            <h3 class="text-lg">Current Month Sales</h3>
+            <p class="text-2xl font-bold">Rs. {{ current_month_sales }}</p>
+        </div>
     </div>
-    <div class="bg-black text-white p-4 rounded-md">
-        <h3 class="text-lg">Average Monthly Sales</h3>
-        <p class="text-2xl font-bold">Rs. {{ average_sales|floatformat:2 }}</p>
-    </div>
-    <div class="bg-black text-white p-4 rounded-md">
-        <h3 class="text-lg">Current Month Sales</h3>
-        <p class="text-2xl font-bold">Rs. {{ current_month_sales }}</p>
+
+    <!-- Charts -->
+    <div class="mt-6" style="height: 400px; width: 100%;">
+  <canvas id="myChart"></canvas>
+</div>
+
+
+    <!-- Top Rated Products Section -->
+    <div class="mt-8 grid grid-cols-2 gap-6">
+        <!-- Product Card View -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-bold mb-4">Top rated Products</h2>
+            <div class="grid grid-cols-3 gap-6">
+                {% for product in top_rated_products %}
+                <div class="bg-gray-100 p-4 rounded-md shadow-sm text-center">
+                    <img src="{{ product.image.url }}" alt="{{ product.title }}" class="w-24 h-24 object-cover mx-auto mb-4">
+                    <h3 class="text-lg font-semibold">{{ product.title }}</h3>
+                    <p class="text-md font-bold">{{ product.price }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Table of Top Selling Products -->
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <h2 class="text-xl font-bold mb-4">Top Selling Products</h2>
+            <table class="min-w-full bg-white rounded-md">
+                <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="py-2 px-4 text-left">Product ID</th>
+                        <th class="py-2 px-4 text-left">Product Name</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in top_selling_products %}
+                    <tr class="border-b">
+                        <td class="py-2 px-4">#{{ product.id }}</td>
+                        <td class="py-2 px-4">{{ product.title }}</td>
+                       
+                    </tr>
+                    {% endfor %}
+                    
+                   
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-            <!-- Charts -->
-            <div>
-               <canvas style"
-               height:50px;
-               " id="myChart"></canvas>
-            </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  const ctx = document.getElementById('myChart');
-  const label ={{ month| safe}}
+  const ctx = document.getElementById('myChart').getContext('2d');
+  const labels = {{ month|safe }};
+  const totalOrders = {{ total_orders|safe }};
   
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: label,
+      labels: labels,
       datasets: [{
         label: 'Orders',
-        data: {{ total_orders|safe }},
-        borderWidth: 1,
-        backgroundColor:'rgb(127, 173, 57)',
-        borderColor:'rgb(127, 173, 57)',
+        data: totalOrders,
+        backgroundColor: [
+          'rgba(127, 173, 57, 0.7)', // Color for each bar
+          'rgba(57, 173, 173, 0.7)', 
+          'rgba(173, 57, 127, 0.7)', 
+          'rgba(57, 127, 173, 0.7)',
+          'rgba(173, 173, 57, 0.7)',
+          'rgba(173, 57, 57, 0.7)',
+          'rgba(57, 173, 127, 0.7)',
+        ],
+        borderColor: [
+          'rgba(127, 173, 57, 1)',
+          'rgba(57, 173, 173, 1)', 
+          'rgba(173, 57, 127, 1)', 
+          'rgba(57, 127, 173, 1)',
+          'rgba(173, 173, 57, 1)',
+          'rgba(173, 57, 57, 1)',
+          'rgba(57, 173, 127, 1)',
+        ],
+        borderWidth: 2,
+        hoverBackgroundColor: 'rgba(127, 173, 57, 0.9)', // Hover effect
+        hoverBorderColor: 'rgba(127, 173, 57, 1)'
       }]
     },
     options: {
+      responsive: true,  // Makes it responsive
+      maintainAspectRatio: false,  // Adjusts to different container sizes
       scales: {
         y: {
-          beginAtZero: true
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1,  // Defines step size for y-axis
+            color: '#333' // Tick color
+          },
+          grid: {
+            color: 'rgba(200, 200, 200, 0.2)',  // Grid line color
+          }
+        },
+        x: {
+          ticks: {
+            color: '#333'  // Label color for x-axis
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: function(tooltipItem) {
+              return `Orders: ${tooltipItem.raw}`;
+            }
+          }
+        }
+      },
+      layout: {
+        padding: {
+          left: 10,
+          right: 10,
+          top: 20,
+          bottom: 10
         }
       }
     }
   });
 </script>
-{% comment %} <h2>Recent User Actions</h2>
-<table>
-    <thead>
-        <tr>
-            <th>User</th>
-            <th>Action</th>
-            <th>Description</th>
-            <th>Timestamp</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for action in recent_actions %}
-        <tr>
-            <td>{{ action.user.username }}</td>
-            <td>{{ action.get_action_type_display }}</td>
-            <td>{{ action.description }}</td>
-            <td>{{ action.timestamp|date:"Y-m-d H:i" }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table> {% endcomment %}
 
-{% endblock  %}
+
+{% endblock %}

@@ -14,8 +14,6 @@ urlpatterns = [
     # path('shop-details/', views.pages1, name='pages1'),  # Shop details page
     path('checkout/', views.checkout, name='checkout'),  # Checkout page
     path('contact/', views.contact, name='contact'),  # Contact page
-    path('blog/', views.blog, name='blog'),  # Blog page
-    path('blog-details/', views.blog_details, name='blog_details'),  # Blog details page
     path('categories/', views.categories, name='categories'),  # Categories page
     path('category/<str:cid>/', views.category_product_list, name='category_product_list'),  # Category product list with category id
     path('vendors/', views.vendor_list_view, name='vendor_list'),  # Vendor list page
@@ -36,6 +34,7 @@ urlpatterns = [
     path('customer_dashboard', views.customer_dashboard, name='customer_dashboard'),
     path('order_detail/<int:order_id>/', views.order_detail, name='order_detail'),
     path('make-default-address', views.make_default_address, name='make-default-address'),
+   path('about_company', views.about_company, name='about_company'),
    
 ]
     

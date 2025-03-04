@@ -1,0 +1,13 @@
+{% extends "partials/base.html" %}
+{% block content %}
+    <!-- About Company Section -->
+    <section id="about-company">
+        <h1>{{ about_company.title }}</h1>
+        <p>{{ about_company.description }}</p>
+        {% if about_company.image %}
+            <img src="{{ about_company.image.url }}" alt="{{ about_company.title }}">
+        {% endif %}
+    </section>
+
+    <!-- Other content goes here -->
+{% endblock %}

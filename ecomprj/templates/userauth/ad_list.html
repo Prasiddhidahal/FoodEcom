@@ -1,37 +1,134 @@
 {% extends 'partials/baseadmin.html' %}
 
 {% block content %}
-<h2>Ad List</h2>
-<table>
+<h2 class="ad-list-title">Ad List</h2>
+
+<table class="ad-list-table">
     <thead>
         <tr>
             <th>Image</th>
             <th>Status</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-{% for ads in ad %}
-    <tr>
-        <td>
-            {% if ads.image %}
-                <img src="{{ ads.image.url }}" width="100" height="100" alt="Ad Image">
-            {% else %}
-                No Image
-            {% endif %}
-        </td>
-        <td>{{ ads.status }}</td>
-        <td>
-            <a href="{% url 'userauth:ad_edit' ads.id %}">Edit</a> |
-            <form action="{% url 'userauth:ad_delete' ads.id %}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this ad?');">
-                {% csrf_token %}
-                <button type="submit">Delete</button>
-            </form>
-        </td>
-    </tr>
-{% endfor %}
-
-
-
+    {% for ads in ad %}
+        <tr>
+            <td data-label="Image">
+                {% if ads.image %}
+                    <img src="{{ ads.image.url }}" alt="Ad Image" class="ad-image">
+                {% else %}
+                    No Image
+                {% endif %}
+            </td>
+            <td data-label="Status">{{ ads.status }}</td>
+            <td data-label="Actions">
+                <a href="{% url 'userauth:ad_edit' ads.id %}" class="edit-btn">Edit</a>
+            </td>
+        </tr>
+    {% endfor %}
     </tbody>
 </table>
+
+<style>
+/* General page styles */
+.ad-list-title {
+    font-size: 28px;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* Table styles */
+.ad-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+    background-color: #fff;
+}
+
+thead {
+    background-color: #f4f4f4;
+}
+
+thead th {
+    padding: 15px;
+    background-color: #333;
+    color: #fff;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+tbody td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+/* Image styles */
+.ad-image {
+    border-radius: 5px;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+/* Alternating row colors for better readability */
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Edit button styles */
+.edit-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.edit-btn:hover {
+    background-color: #2980b9;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+    }
+
+    thead {
+        display: none;
+    }
+
+    tbody tr {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    tbody tr td {
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+    }
+
+    tbody tr td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+}
+</style>
+
 {% endblock %}

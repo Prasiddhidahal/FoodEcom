@@ -73,7 +73,31 @@ class Navbar(models.Model):
 
     class Meta:
         verbose_name_plural = "Navbar"
-    
+
+class Footer(models.Model):
+    title = models.CharField(max_length=100, default="Study in India", null= True, blank=True)
+    url = models.URLField(max_length=200, null=True, blank=True, default="https://studyinindia.com.np/")
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="Active")
+    created_by = models.ForeignKey(User, related_name="created_footers", on_delete=models.SET_NULL, null=True, blank=True)  
+    order = models.IntegerField(default=0)
+    parent = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children'
+    )
+    logo = models.ImageField(upload_to="footer", null=True, blank=True)
+
+class logo(models.Model):
+    image = models.ImageField(upload_to="logo")
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="Active")
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updated_logos')
+
+    class Meta:
+        verbose_name_plural = "Logos"
+
+    def logo_image(self):
+        return mark_safe('<img src="%s" width="50" height="50" />' % self.image.url)
+
+    def __str__(self):
+        return self.status
 class Ad(models.Model):
     image = models.ImageField(upload_to="Ad")
     status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="Active")  # Increase max_length
@@ -87,8 +111,6 @@ class Ad(models.Model):
 
     def __str__(self):
         return self.status
-
-
 class Adimage(models.Model):
     ad = models.ForeignKey(Ad, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='ad_images/')
@@ -98,8 +120,38 @@ class Adimage(models.Model):
 
     def __str__(self):
         return f"Image for {self.ad.status}"
-
     
+class Slider(models.Model):
+    title = models.CharField(max_length=100)
+    image = models.ImageField(upload_to="slider")
+    description = RichTextUploadingField(null=True, blank=True)
+    status = models.CharField(choices=STATUS_CHOICES, max_length=20, default="Active")  # Increase max_length
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updated_sliders')
+
+    class Meta:
+        verbose_name_plural = "Sliders"
+
+    def slider_image(self):
+        return mark_safe('<img src="%s" width="50" height="50" />' % self.image.url)
+
+    def __str__(self):
+        return self.title
+    
+
+class About_company(models.Model):
+    title = models.CharField(max_length=100, blank=True, null=True)
+    image = models.ImageField(upload_to="about", blank=True, null=True)
+    description = RichTextUploadingField(null=True, blank=True)
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updated_about_company')
+
+    class Meta:
+        verbose_name_plural = "About Company"
+
+    def about_image(self):
+        return mark_safe('<img src="%s" width="50" height="50" />' % self.image.url)
+
+    def __str__(self):
+        return self.title
 class Category(models.Model):
     cid = ShortUUIDField(unique=True, length=10, max_length=20, prefix="cat", alphabet="abcdegh12345")
     title = models.CharField(max_length=100)
@@ -117,8 +169,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.title
-
-
 class CategoryImage(models.Model):
     category = models.ForeignKey(Category, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='category/images/')
@@ -128,7 +178,6 @@ class CategoryImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.category.title}"
-
 class Vendor(models.Model):
     vid = ShortUUIDField(unique=True, length=10, max_length=20, prefix="ven", alphabet="abcdegh12345")
     title = models.CharField(max_length=100)
@@ -154,7 +203,6 @@ class Vendor(models.Model):
 
 class Tags(models.Model):
     pass
-
 
 class Product(models.Model):
     pid = ShortUUIDField(unique=True, length=10, max_length=20, alphabet="abcdegh12345")
@@ -186,7 +234,6 @@ class Product(models.Model):
     sold_quantity = models.IntegerField(default=0)
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='updated_products')
     
-
     class Meta:
         verbose_name_plural = "Products"     
 
@@ -207,8 +254,7 @@ class Product(models.Model):
     def get_percentage(self):
         return (self.price / self.old_price) * 100 if self.old_price else 0
 
-
-#ProductImages#
+#ProductImages
 class ProductImages(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE,related_name="products_images")
     image = models.ImageField(upload_to='products/images/')
@@ -217,7 +263,7 @@ class ProductImages(models.Model):
     class Meta:
         verbose_name_plural = "Product Images"
 
-#cartorder#
+#cartorder
 class CartOrder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     price = models.DecimalField(max_digits=10, decimal_places=2, default="1.99")
@@ -250,10 +296,7 @@ class CartOrderItems(models.Model):
     def order_img(self):
         return mark_safe('<img src="/media/" width="50" height="50" />' % self.image)
 
-
-
-
-#Product Review#
+#Product Review
 class ProductReview(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, related_name="reviews")
@@ -288,17 +331,10 @@ class Address(models.Model):
     def __str__(self):
         return f"{self.address}"
 
-
-    
-
-
-
-
 from django.db import models
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
-
 class UserAction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     action_type = models.CharField(max_length=50, choices=ACTION_TYPES)

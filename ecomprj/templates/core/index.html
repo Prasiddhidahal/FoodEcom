@@ -18,6 +18,80 @@
         </div>
     </div>
 </section>
+<div id="advertisement-slider" class="slider_container">
+  {% if slider %}
+  <div class="swiper mySwiper">
+    <div class="swiper-wrapper">
+      {% for sli in slider %}
+      <div class="swiper-slide">
+        <img src="{{ sli.image.url }}" alt="{{ sli.status }}" />
+
+        <div class="brand-parent">
+          <b class="brand">BRAND</b>
+          <div class="line-parent">
+            <div class="frame-child"></div>
+            <div class="mens-wear">{{ sli.status }}</div>
+            <div class="lorem-ipsum-dolor">
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus
+              congue eros non est elementum, at luctus velit facilisis. Sed
+              risus quam, pulvinar eget fermentum, ac se.
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Navigation Arrows -->
+    <div class="swiper-next">
+      <div class="inner-next">
+        <img
+          src="{% static 'arrow-right.svg' %}"
+          alt="arrow-square-right"
+          class="arrow-right"
+        />
+      </div>
+    </div>
+    <div class="swiper-prev">
+      <div class="inner-prev">
+        <img
+          src="{% static 'arrow-left.svg' %}"
+          alt="arrow-square-left"
+          class="arrow-left"
+        />
+      </div>
+    </div>
+
+    <!-- Pagination Dots -->
+    <div class="swiper-pagination"></div>
+  </div>
+  {% else %}
+  <p>No slider available</p>
+  {% endif %}
+</div>
+
+<!-- Swiper JS and Initialization -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  var swiper = new Swiper(".mySwiper", {
+    cssMode: true,
+    loop: true,
+    navigation: {
+      nextEl: ".swiper-next",
+      prevEl: ".swiper-prev",
+    },
+    pagination: {
+      el: ".swiper-pagination",
+      clickable: true,
+    },
+    autoplay: {
+      delay: 5000,
+      disableOnInteraction: false,
+    },
+    mousewheel: true,
+    keyboard: true,
+  });
+</script>
 
 
 <div id="advertisement-slider" class="advertisement-slider">
@@ -32,111 +106,194 @@
         <p>No advertisements available</p>
     {% endif %}
 </div>
-<style>
-    .advertisement-slider {
-        position: relative;
-        width: 100%;
-        height: 300px; /* Adjust as per your design */
-        overflow: hidden;
-    }
+{% comment %} <style>
+    .slider_container {
+  width: 100%;
+  aspect-ratio: 16/9;
+  margin-top: 20px;
+}
 
-    .slider {
-        display: flex;
-    }
+.swiper {
+  width: 100%;
+  height: 100%;
+}
 
-    .slider-item {
-        display: block;
-        width: 100%;
-        height: 100%;
-    }
+.swiper-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: right;
+  position: relative;
+}
 
-    .slider-item img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-</style>
-    <!-- Hero Section Begin -->
-    <section class="featured spad">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title">
-                        <h2>Featured Product</h2>
-                    </div>
-                    <div class="featured__controls">
-                        <ul>
-                            <li class="active" data-filter="*">All</li>
-                            {% for category in categories %}
-                            <li data-filter=".{{ category.title|lower|slugify }}">{{ category.title }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="row featured__filter">
-                {% for p in products %}
-                <div class="col-lg-3 col-md-4 col-sm-6 mix {{ p.category.title|lower|slugify }}">
-                    <div class="featured__item">
-                        <div class="featured__item__pic set-bg" data-setbg="{{ p.image.url }}">
-                            <ul class="featured__item__pic__hover">
-                                <li><a href="{% url 'core:pages1' pid=p.id %}"><i class="fa fa-eye"></i></a></li>
-                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
-                                <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                <div class="add-to-cart">
-                                    <div class="product__details__quantity"></div>
-                                    <input type="hidden" value="1" id="product-quantity" class="product-quantity-{{ p.id }}">  
-                                    <input type="hidden" value="{{p.id}}" id="product-id" class="product-id-{{ p.id }}">
-                                    <input type="hidden" value="{{p.pid}}" id="product-pid" class="product-pid-{{ p.id }}">
-                                    <input type="hidden" class="product-image-{{p.id}}" id="product-image" value="{{ p.image.url }}">
-                                    <input type="hidden" class="product-price-{{ p.id }}" id="product-price" value="{{ p.price }}">
-                                    <input type="hidden" class="product-title-{{ p.id }}" id="product-title" value="{{ p.title }}">
-                                    <button class="add-to-cart" data-index="{{ p.id }}"><i class="fa fa-shopping-cart"></i></button>
-                                </div>
-                            </ul>
-                        </div>
-                        <div class="featured__item__text">
-                            <h6><a href="#">{{ p.title }}</a></h6>
-                            <span>$</span> <h5>{{ p.price }}</h5>
-                            {% if p.old_price %}
-                                <h5>
-                                    
-                                 <span>$</span><span style="text-decoration: line-through; color: gray;">{{ p.old_price }}</span>
-                                </h5>
-                            {% endif %}
-                            {% if p.vendor %}
-                                <p>Sold by: <strong>{{ p.vendor.title|lower|slugify }}</strong></p>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </section>
-    <!-- Hero Section End -->
+.swiper-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-    <!-- Categories Section Begin -->
-    <!-- Categories Section End -->
+.brand-parent {
+  position: absolute;
+  top: 50%;
+  left: 70%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  color: #161616;
+  font-family: "Playfair Display";
+  z-index: 1;
+  padding: 10px;
+  border-radius: 5px;
+  align-self: stretch;
+  line-height: 150%;
+  text-transform: capitalize;
+}
 
-    <!-- Banner Begin -->
-    <div class="banner">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-6 col-md-6 col-sm-6">
-                    <div class="banner__pic">
-                        <img src="{% static 'img/banner/banner-1.jpg' %}" alt="">
-                    </div>
-                </div>
-                <div class="col-lg-6 col-md-6 col-sm-6">
-                    <div class="banner__pic">
-                        <img src="{% static 'img/banner/banner-2.jpg' %}" alt="">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Banner End -->
+.brand {
+  width: 100%;
+  position: relative;
+  font-size: 96px;
+  line-height: 150%;
+  text-transform: capitalize;
+  display: inline-block;
+  font-family: "Playfair Display";
+  color: #161616;
+  text-align: center;
+}
+.frame-child {
+  width: 338px;
+  position: relative;
+  border-top: 1px solid #161616;
+  box-sizing: border-box;
+  height: 1px;
+}
+.mens-wear {
+  width: 100%;
+  position: relative;
+  font-size: 36px;
+  line-height: 150%;
+  text-transform: capitalize;
+  font-weight: 600;
+  font-family: "Playfair Display";
+  color: #161616;
+  text-align: center;
+  display: inline-block;
+}
+.lorem-ipsum-dolor {
+  width: 100%;
+  max-width: 360px;
+  position: relative;
+  font-size: 16px;
+  line-height: 150%;
+  text-transform: capitalize;
+  font-family: "Playfair Display";
+  color: #161616;
+  text-align: center;
+  display: inline-block;
+  text-align: justify;
+}
+.line-parent {
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  font-size: 36px;
+}
+
+.swiper-next,
+.swiper-prev {
+  display: none;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  width: 50px;
+  z-index: 10;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0.8;
+}
+.inner-prev{
+  justify-content: right;
+  background-color: white;
+  width: 50px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+}
+.inner-next{
+  justify-content: left;
+  background-color: white;
+  opacity: 0.8;
+  width: 50px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+}
+.swiper-next {
+  right: -25px;
+}
+
+.swiper-prev {
+  left: -25px;
+}
+.inner-next .arrow-right{
+  width: 30px;
+  height: 30px;
+}
+.inner-prev .arrow-left{
+  width: 25px;
+  height: 25px;
+}
+
+.mySwiper:hover .swiper-next,
+.mySwiper:hover .swiper-prev {
+  display: block;
+}
+
+.swiper-next::after {
+  border-width: 6px 0 6px 10px;
+  border-color: transparent transparent transparent #696969;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.swiper-prev::after {
+  border-width: 6px 10px 6px 0;
+  border-color: transparent #696969 transparent transparent;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.swiper-next:hover,
+.swiper-prev:hover {
+  opacity: 1;
+}
+.swiper-pagination-bullet{
+  background-color: #fff;
+  opacity: 0.5;
+}
+.swiper-pagination-bullet-active{
+  background-color: #000;
+}
+
+</style> {% endcomment %}
 
     <!-- Latest Product Section Begin -->
     <section class="latest-product spad">
@@ -256,66 +413,61 @@
     {% endif %}
 </div>
 
-
-
-
-
     <!-- Blog Section Begin -->
-    <section class="from-blog spad">
+        <section class="featured spad">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12">
-                    <div class="section-title from-blog__title">
-                        <h2>From The Blog</h2>
+                    <div class="section-title">
+                        <h2>Featured Product</h2>
+                    </div>
+                    <div class="featured__controls">
+                        <ul>
+                            <li class="active" data-filter="*">All</li>
+                            {% for category in categories %}
+                            <li data-filter=".{{ category.title|lower|slugify }}">{{ category.title }}</li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-lg-4 col-md-4 col-sm-6">
-                    <div class="blog__item">
-                        <div class="blog__item__pic">
-                            <img src="{% static 'img/blog/blog-1.jpg' %}" alt="">
-                        </div>
-                        <div class="blog__item__text">
-                            <ul>
-                                <li><i class="fa fa-calendar-o"></i> May 4,2019</li>
-                                <li><i class="fa fa-comment-o"></i> 5</li>
+            <div class="row featured__filter">
+                {% for p in products %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mix {{ p.category.title|lower|slugify }}">
+                    <div class="featured__item">
+                        <div class="featured__item__pic set-bg" data-setbg="{{ p.image.url }}">
+                            <ul class="featured__item__pic__hover">
+                                <li><a href="{% url 'core:pages1' pid=p.id %}"><i class="fa fa-eye"></i></a></li>
+                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
+                                <li><a href="#"><i class="fa fa-retweet"></i></a></li>
+                                <div class="add-to-cart">
+                                    <div class="product__details__quantity"></div>
+                                    <input type="hidden" value="1" id="product-quantity" class="product-quantity-{{ p.id }}">  
+                                    <input type="hidden" value="{{p.id}}" id="product-id" class="product-id-{{ p.id }}">
+                                    <input type="hidden" value="{{p.pid}}" id="product-pid" class="product-pid-{{ p.id }}">
+                                    <input type="hidden" class="product-image-{{p.id}}" id="product-image" value="{{ p.image.url }}">
+                                    <input type="hidden" class="product-price-{{ p.id }}" id="product-price" value="{{ p.price }}">
+                                    <input type="hidden" class="product-title-{{ p.id }}" id="product-title" value="{{ p.title }}">
+                                    <button class="add-to-cart" data-index="{{ p.id }}"><i class="fa fa-shopping-cart"></i></button>
+                                </div>
                             </ul>
-                            <h5><a href="#">Cooking tips make cooking simple</a></h5>
-                            <p>Sed quia non numquam modi tempora indunt ut labore et dolore magnam aliquam quaerat </p>
+                        </div>
+                        <div class="featured__item__text">
+                            <h6><a href="#">{{ p.title }}</a></h6>
+                            <span>$</span> <h5>{{ p.price }}</h5>
+                            {% if p.old_price %}
+                                <h5>
+                                    
+                                 <span>$</span><span style="text-decoration: line-through; color: gray;">{{ p.old_price }}</span>
+                                </h5>
+                            {% endif %}
+                            {% if p.vendor %}
+                                <p>Sold by: <strong>{{ p.vendor.title|lower|slugify }}</strong></p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-4 col-md-4 col-sm-6">
-                    <div class="blog__item">
-                        <div class="blog__item__pic">
-                            <img src="{% static 'img/blog/blog-2.jpg' %}" alt="">
-                        </div>
-                        <div class="blog__item__text">
-                            <ul>
-                                <li><i class="fa fa-calendar-o"></i> May 4,2019</li>
-                                <li><i class="fa fa-comment-o"></i> 5</li>
-                            </ul>
-                            <h5><a href="#">6 ways to prepare breakfast for 30</a></h5>
-                            <p>Sed quia non numquam modi tempora indunt ut labore et dolore magnam aliquam quaerat </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-4 col-sm-6">
-                    <div class="blog__item">
-                        <div class="blog__item__pic">
-                            <img src="{% static 'img/blog/blog-3.jpg' %}" alt="">
-                        </div>
-                        <div class="blog__item__text">
-                            <ul>
-                                <li><i class="fa fa-calendar-o"></i> May 4,2019</li>
-                                <li><i class="fa fa-comment-o"></i> 5</li>
-                            </ul>
-                            <h5><a href="#">Visit the clean farm in the US</a></h5>
-                            <p>Sed quia non numquam modi tempora indunt ut labore et dolore magnam aliquam quaerat </p>
-                        </div>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </section>

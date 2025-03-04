@@ -1,0 +1,49 @@
+{% extends "partials/baseadmin.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <h2 class="page-title">Footer Items</h2>
+
+    <ul class="footer-list">
+        {% for footer in footers %}
+            <li class="footer-item">
+                <div class="footer-item-content">
+                    <a href="{% url 'userauth:footer_view' footer.id %}" class="footer-link">{{ footer.title }}</a> - 
+                    <a href="{% url 'userauth:footer_edit' footer.id %}" class="edit-link">Edit</a> - 
+                    <form action="{% url 'userauth:footer_delete' footer.id %}" method="POST" class="delete-form">
+                        {% csrf_token %}
+                        <button type="submit" class="delete-button">Delete</button>
+                    </form>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2 class="add-footer-title">Add Footer Item</h2>
+    <form method="POST" class="add-footer-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="add-footer-button">Add Footer</button>
+    </form>
+</div>
+
+<style>
+    .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+    .page-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+    .footer-list { list-style-type: none; padding-left: 0; margin-bottom: 30px; }
+    .footer-item { margin-bottom: 15px; font-size: 18px; display: flex; justify-content: space-between; align-items: center; }
+    .footer-item-content { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+    .footer-link { text-decoration: none; color: #007bff; font-weight: bold; }
+    .footer-link:hover { text-decoration: underline; }
+    .edit-link { color: #28a745; font-weight: bold; margin-right: 10px; }
+    .edit-link:hover { text-decoration: underline; }
+    .delete-form { display: inline; }
+    .delete-button { background-color: #dc3545; color: white; padding: 5px 10px; cursor: pointer; border-radius: 4px; }
+    .delete-button:hover { background-color: #c82333; }
+    .add-footer-title { font-size: 22px; margin-top: 30px; margin-bottom: 10px; }
+    .add-footer-form { margin-bottom: 20px; }
+    .add-footer-button { background-color: #007bff; color: white; padding: 10px 15px; border-radius: 4px; cursor: pointer; }
+    .add-footer-button:hover { background-color: #0056b3; }
+</style>
+{% endblock %}

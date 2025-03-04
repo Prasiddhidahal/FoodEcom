@@ -1,0 +1,37 @@
+{% extends 'partials/baseadmin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="p-4">
+    <h2 class="text-2xl font-semibold mb-4">Manage Sliders</h2>
+    
+    <!-- Grid container for slider images -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for slider in sliders %}
+        <div class="relative bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+            <!-- Slider Image -->
+            <img src="{{ slider.image.url }}" alt="{{ slider.title }}" class="w-full h-48 object-cover">
+            
+            <!-- Image Details: Title and Caption -->
+            <div class="p-4">
+                <h3 class="text-lg font-semibold text-white">{{ slider.title }}</h3>
+                <p class="text-gray-300">{{ slider.caption }}</p>
+            </div>
+            
+            <!-- Overlay actions (Edit, Delete) -->
+            <div class="absolute top-2 right-2 flex space-x-2">
+                <a href="{% url 'userauth:slider_edit' slider.id %}" class="bg-blue-500 text-white p-2 rounded-lg shadow-lg hover:bg-blue-600">
+                    Edit
+                </a>
+                <a href="#" class="bg-red-500 text-white p-2 rounded-lg shadow-lg hover:bg-red-600">
+                    Delete
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+   
+</div>
+{% endblock %}
+

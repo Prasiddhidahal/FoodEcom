@@ -1,5 +1,5 @@
 from django.contrib import admin
-from core.models import Ad, Adimage, Product, Category, Vendor, CartOrder, CartOrderItems, ProductImages, ProductReview, Wishlist, Address,Tags,  CategoryImage, Navbar
+from core.models import About_company, Ad, Adimage, Product, Category, Vendor, CartOrder, CartOrderItems, ProductImages, ProductReview, Wishlist, Address,Tags,  CategoryImage, Navbar, Slider, Footer, About_company
 
 
 @admin.register(Navbar)
@@ -9,6 +9,16 @@ class NavbarAdmin(admin.ModelAdmin):
     search_fields = ('title', 'url')  # Add search functionality for title and url
     ordering = ('order',)  # Optionally, add ordering by title
 
+@admin.register(Footer)
+class FooterAdmin(admin.ModelAdmin):
+    list_display = ('title', 'url', 'status', 'order', 'parent', 'created_by', 'logo')
+    list_filter = ('status', 'parent', 'created_by')
+    search_fields = ('title', 'url', 'status', 'order', 'parent', 'created_by', 'logo')
+
+@admin.register(About_company)
+class AboutAdmin(admin.ModelAdmin):
+    list_display = ('title', 'description', 'updated_by')
+    search_fields = ('title', 'description',  'updated_by')
 class ProductImagesAdmin(admin.TabularInline):
     model = ProductImages
 
@@ -25,6 +35,14 @@ class AdAdmin(admin.ModelAdmin):
 
 # Register the Ad model with the admin site
 admin.site.register(Ad, AdAdmin)
+
+class sliderAdmin(admin.ModelAdmin):
+    list_display = ('title', 'slider_image', 'status', 'updated_by')
+    list_filter = ('status',)
+    search_fields = ('title', 'status')
+    readonly_fields = ('slider_image',)  # Show the image in the admin
+
+admin.site.register(Slider, sliderAdmin)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'price', 'category', 'stock_status', 'in_stock', 'stock_quantity', 'vendor')
     list_filter = ('category', 'vendor')

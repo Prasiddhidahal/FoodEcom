@@ -19,7 +19,7 @@ from django.conf import settings
 import calendar
 from datetime import datetime
 from django.db.models.functions import ExtractMonth
-
+from .models import  About_company, Footer, Navbar, Category, Ad, Slider 
 
 # Function to generate HMAC SHA256 signature
 def genSha256(key, message):
@@ -31,7 +31,7 @@ def genSha256(key, message):
     signature = base64.b64encode(digest).decode('utf-8')
 
     return signature
-
+#modes of payment 
 def initiate_khalti(request):
     url = "https://a.khalti.com/api/v2/epayment/initiate/"
     return_url = request.POST.get('return_url')
@@ -50,7 +50,6 @@ def initiate_khalti(request):
         "name": user.username,
         "email": user.email,
         "phone": "9800000001",
-        # "phone": user.phone_number
         }
     })
     headers = {
@@ -61,14 +60,13 @@ def initiate_khalti(request):
     response = requests.request("POST", url, headers=headers, data=payload)
     if response.text:
         try:
-            new_res = response.json()  # This will safely parse JSON
+            new_res = response.json()  
         except ValueError as e:
             print("Error parsing JSON:", e)
-            # Handle the error, possibly returning an error response to the user
+            
     else:
         print("Empty response:", response.text)
-    # new_res= json.loads(response.text)
-    # dd(new_res)
+    
     return redirect(new_res['payment_url'])
     
 def khalti_verify(request):
@@ -85,10 +83,9 @@ def khalti_verify(request):
     response = requests.request("POST", url, headers=headers, data=payload)
     new_res= json.loads(response.text)
     
-    # dd(new_res)
     if new_res['status'] == 'Completed':
         messages.success(request,"Payment completed successfully.")
-        return redirect('core:invoice')  # Redirect to the invoice page
+        return redirect('core:invoice')  
     elif new_res['status'] == 'Pending':
         messages.warning(request,"Payment is still pending.")
     elif new_res['status'] == 'Initiated':
@@ -136,47 +133,39 @@ def verify_esewa(request):
             print(e)
             messages.error(request,"The service is currently down please try again later or contact our representatives")
             return redirect("core:index")
-from .models import  Navbar, Category, Ad 
+
 
 def index(request):
     products = Product.objects.filter(product_status="published")
     categories = Category.objects.all()
     vendors = Vendor.objects.all()
 
-    # Latest Products that are in stock and published
     latest_products = Product.objects.filter(
         product_status="published", in_stock=True
     ).order_by('-mfd')[:6]
     
-    # Products that are on sale
     in_sale = Product.objects.filter(in_sale=True, product_status="published")[:6]
-
-    # Top-rated products with average ratings
     top_rated_products = Product.objects.filter(
         product_status="published"
     ).annotate(
-        average_rating=Avg('reviews__rating')  # Calculate the average rating from related reviews
+        average_rating=Avg('reviews__rating')  
     ).filter(
-        average_rating__isnull=False  # Exclude products with no ratings
+        average_rating__isnull=False 
     ).order_by('-average_rating')[:3]
-    
-    # Reviewed products (those with more than 0 reviews)
     reviewed_products = Product.objects.filter(
         product_status="published"
     ).annotate(
         review_count=Count('reviews')
     ).filter(
         review_count__gt=0
-    )[:6]  # Limit to 6 products
-
-    # Fetch the active navbar items and order them by the 'order' field
+    )[:6]  
     navbars = Navbar.objects.filter(status='Active').order_by('order')
-    
-    # Fetch active advertisements
     ads = Ad.objects.filter(status='Active').prefetch_related('images')[:1]
     ads2 = Ad.objects.filter(status='Active').prefetch_related('images')[1:]
-
+    slider = Slider.objects.filter(status='Active').order_by('status')
+    footer=Footer.objects.filter()
     
+
     context = {
         'products': products,
         'categories': categories,
@@ -187,18 +176,18 @@ def index(request):
         'in_sale': in_sale,
         'navbars': navbars, 
         'ads': ads  ,
-        'ads2': ads2
+        'ads2': ads2,
+        'slider': slider,
+        'footer':footer, 
+        
     }
 
     return render(request, 'core/index.html', context)
 
-
+#category
 def categories(request):
-    # Get all categories
     products=Product.objects.filter(product_status="published")
     categories = Category.objects.all()
-
-    # Calculate the number of products for each category
     for category in categories:
         category.product_count = Product.objects.filter(category=category).count()
 
@@ -210,10 +199,7 @@ def categories(request):
     return render(request, 'core/category_products.html', context)
 
 def category_product_list(request, cid):
-    # Get the category using the 'cid' which is a string
-    category = Category.objects.get ( cid=cid)  # Assuming 'cid' is a unique identifier (string)
-
-    # Get all products in the category
+    category = Category.objects.get ( cid=cid) 
     products = Product.objects.filter(product_status="published", category=category)
     
     context = {
@@ -230,20 +216,6 @@ def contact(request):
     }
     return render(request, 'core/contact.html', context)
 
-def blog(request):
-    categories = Category.objects.all()
-    context = {
-        'categories': categories,
-    }
-    return render(request, 'core/blog.html', context)
-
-def blog_details(request):
-    categories = Category.objects.all()
-    context = {
-        'categories': categories,
-    }
-    return render(request, 'core/blog-details.html', context)
-
 def register(request):
     categories = Category.objects.all()
     context = {
@@ -258,10 +230,7 @@ def vendor_list_view(request):
     }
     return render(request, 'core/vendor_list.html', context)
 def vendor_products(request, vid):
-    # Change 'id' to the correct field, like 'slug' or 'vid'
-    vendor = get_object_or_404(Vendor, vid=vid)  # Using 'vid' as the field name
-
-    # Get all products associated with the vendor
+    vendor = get_object_or_404(Vendor, vid=vid) 
     products = Product.objects.filter(vendor=vendor, product_status="published")
 
     context = {
@@ -275,44 +244,36 @@ def shop(request):
     latest_products = Product.objects.filter(
         product_status="published", in_stock=True
     ).order_by('-mfd')[:6]
-    vendors = Vendor.objects.all()  # Fetching all vendors
-    tags = Tag.objects.all()  # Fetching all tags for the filter
+    vendors = Vendor.objects.all()  
+    tags = Tag.objects.all()   
 
-    tag_slug = request.GET.get('tag')  # Get tag slug from query parameters
+    tag_slug = request.GET.get('tag') 
 
     if tag_slug:
-        tag = get_object_or_404(Tag, slug=tag_slug)  # Get the tag or return 404
-        latest_products = latest_products.filter(tags__in=[tag])  # Filter products by the tag
+        tag = get_object_or_404(Tag, slug=tag_slug) 
+        latest_products = latest_products.filter(tags__in=[tag])  
 
     context = {
         'categories': categories,
         'latest_products': latest_products,
-        'vendors': vendors,  # Pass vendors to the context
-        'tags': tags,  # Pass tags to the context
-        'selected_tag': tag_slug  # Pass selected tag to highlight it
+        'vendors': vendors,  
+        'tags': tags,  
+        'selected_tag': tag_slug 
     }
     return render(request, 'core/shop-grid.html', context)
 
+#product page
 def pages1(request, pid):
-    # Fetch the product by its ID
     product = get_object_or_404(Product, id=pid)
-
-    # Fetch related products from the same category, excluding the current product
     related_products = Product.objects.filter(
         category=product.category,
         product_status="published"
-    ).exclude(id=pid)[:4]  # Limit to 4 related products
-
-    # Fetch product images
+    ).exclude(id=pid)[:4] 
     products_images = product.products_images.all()
-
-    # Initialize the address variable
     address = None
     if request.user.is_authenticated:
-        # Fetch the address for the authenticated user, or None if not found
         address = Address.objects.filter(user=request.user).first()
 
-    # Fetch product reviews
     ReviewForm = ProductReviewForm()
 
     # Calculate the average rating, defaulting to 0 if there are no reviews
@@ -321,15 +282,14 @@ def pages1(request, pid):
     # Create a star range for display purposes (1 to 5 stars)
     star_range = [1, 2, 3, 4, 5]
 
-    # Prepare the context for rendering the template
     context = {
         'review_form': ProductReviewForm(),
         'product': product,
         'related_products': related_products,
         'products_images': products_images,
         'average_rating': average_rating,
-        'star_range': star_range,  # Pass the range to the template
-        'address': address  # Pass the user's address if available
+        'star_range': star_range,  
+        'address': address,
     }
 
     return render(request, 'core/pages1.html', context)
@@ -339,8 +299,8 @@ def tag_list(request, tag_slug=None):
     tag = None
 
     if tag_slug:
-        tag = get_object_or_404(Tag, slug=tag_slug)  # Get the tag or return 404
-        products = products.filter(tags__in=[tag])  # Filter products by the tag
+        tag = get_object_or_404(Tag, slug=tag_slug)  
+        products = products.filter(tags__in=[tag])  
 
     context = {
         'products': products,
@@ -356,17 +316,13 @@ def add_review(request, pid):
         form = ProductReviewForm(request.POST)
         
         if form.is_valid():
-            # Check if the user has already reviewed this product
             if ProductReview.objects.filter(product=product, user=request.user).exists():
                 return JsonResponse({'bool': False, 'message': 'You have already reviewed this product'}, status=400)
             
-            # Save the review
             review = form.save(commit=False)
             review.product = product
             review.user = request.user
             review.save()
-            
-            # Optionally, calculate and update the average rating here
             average_rating = ProductReview.objects.filter(product=product).aggregate(Avg('rating'))
             product.average_rating = average_rating.get('rating__avg', 0)
             product.save()
@@ -388,7 +344,7 @@ def add_review(request, pid):
 
 def search_products(request):
     query = request.GET.get('q')
-    products = Product.objects.filter(title__icontains=query)# if fresh pear then if we type pear or fre or esh then it will show the result
+    products = Product.objects.filter(title__icontains=query)
     context = {
         'products': products,
         'query': query
@@ -396,13 +352,11 @@ def search_products(request):
     return render(request, 'core/search.html', context)
 
 def filter_product(request):
-    category_slugs = request.GET.getlist('category[]')  # List of category slugs (not IDs)
-    vendor_ids = request.GET.getlist('vendor[]')  # List of vendor IDs
-    tag_ids = request.GET.getlist('tag[]')  # List of tag IDs
-
-    # Use .get() to avoid KeyError and provide default values
-    min_price = request.GET.get('min_price', 0)  # Default min_price to 0
-    max_price = request.GET.get('max_price', 1000000)  # Default max_price to a very large number
+    category_slugs = request.GET.getlist('category[]')  
+    vendor_ids = request.GET.getlist('vendor[]') 
+    tag_ids = request.GET.getlist('tag[]') 
+    min_price = request.GET.get('min_price', 0) 
+    max_price = request.GET.get('max_price', 1000000)  
 
     try:
         min_price = float(min_price)
@@ -412,19 +366,14 @@ def filter_product(request):
         max_price = 1000000
 
     products = Product.objects.filter(product_status="published").order_by("-id").distinct()
-
-    # Filter by price range
     products = products.filter(price__gte=min_price, price__lte=max_price)
 
-    # Filter by category slugs if provided
     if category_slugs:
         products = products.filter(category__slug__in=category_slugs).distinct()
 
-    # Filter by vendor IDs if provided
     if vendor_ids:
         products = products.filter(vendor__id__in=vendor_ids).distinct()
 
-    # Filter by tag IDs if provided
     if tag_ids:
         products = products.filter(tags__id__in=tag_ids).distinct()
 
@@ -437,32 +386,27 @@ def filter_product(request):
         "data": data,
     })
 def filter_product(request):
-    
-    category_cids = request.GET.getlist('category[]')  # List of category IDs (not slugs)
-    vendor_vids = request.GET.getlist('vendor[]')  # List of vendor IDs
+    category_cids = request.GET.getlist('category[]') 
+    vendor_vids = request.GET.getlist('vendor[]')  
     tag_slugs = request.GET.getlist('tag[]')
     
-    # Use .get() to avoid KeyError and provide default values
     min_price = request.GET.get('min_price', None)
     max_price = request.GET.get('max_price', None)
 
-    # Convert min_price and max_price to floats if provided
     if min_price is not None:
         try:
             min_price = float(min_price)
         except ValueError:
-            min_price = None  # Handle invalid values gracefully
+            min_price = None  
 
     if max_price is not None:
         try:
             max_price = float(max_price)
         except ValueError:
-            max_price = None  # Handle invalid values gracefully
+            max_price = None  
 
-    # Start with all products that are published
     products = Product.objects.filter(product_status="published").order_by("-id").distinct()
 
-    # Apply price filtering if min_price and max_price are provided
     if min_price is not None and max_price is not None:
         products = products.filter(price__gte=min_price, price__lte=max_price)
     elif min_price is not None:
@@ -470,24 +414,20 @@ def filter_product(request):
     elif max_price is not None:
         products = products.filter(price__lte=max_price)
 
-    # Filter by category IDs if provided
     if category_cids:
         products = products.filter(category__cid__in=category_cids).distinct()
 
-    # Filter by vendor IDs if provided
     if vendor_vids:
         products = products.filter(vendor__vid__in=vendor_vids).distinct()
 
-    # Filter by tag slugs if provided
     if tag_slugs:
         products = products.filter(tags__slug__in=tag_slugs).distinct()
 
-    # Fetch all tags to populate the filter form
     tags = Tag.objects.all()
 
     context = {
         "products": products,
-        "tags": tags,  # Pass the tags to the context
+        "tags": tags, 
     }
     data = render_to_string("core/async/product-list.html", context)
 
@@ -499,8 +439,8 @@ def add_to_cart(request):
     cart_product = {
         str(request.GET['id']): {
             'title': request.GET['title'],
-            'price': float(request.GET['price']),  # Ensure price is a float for calculation
-            'qty': int(request.GET['qty']),        # Ensure quantity is an integer
+            'price': float(request.GET['price']),  
+            'qty': int(request.GET['qty']),        
             'image': request.GET['image'],
             'pid': request.GET['pid'],
         }
@@ -522,9 +462,6 @@ def add_to_cart(request):
 
         request.session['cart_data_object'] = cart_product
 
-
-    
-
     return JsonResponse({
         "data": request.session['cart_data_object'],
         'totalcartitems': len(request.session['cart_data_object']),
@@ -539,7 +476,7 @@ def cart_view(request):
         return render(request, 'core/shoping-cart.html',{
             "cart_data": request.session['cart_data_object'],
             'total_cart_items':len(request.session['cart_data_object']),
-            'cart_total_amount':cart_total_amount, # Total to be shown in the template
+            'cart_total_amount':cart_total_amount, 
         })
     else:
         messages.error(request, 'Your cart is empty')
@@ -565,7 +502,6 @@ def remove_from_cart(request):
         'cart_total_amount': cart_total_amount,
     }
 
-    
     cart_list_html = render_to_string('core/async/cart-list.html', context)
 
     return JsonResponse({
@@ -594,7 +530,6 @@ def update_from_cart(request):
         'cart_total_amount': cart_total_amount,
     }
 
-    
     cart_list_html = render_to_string('core/async/cart-list.html', context)
 
     return JsonResponse({
@@ -604,7 +539,7 @@ def update_from_cart(request):
 
 def checkout(request):
     cart_total_amount = 0
-    cart_data = request.session.get('cart_data_object', {})  # Safely get cart data from session
+    cart_data = request.session.get('cart_data_object', {})  
 
     if cart_data:
         for product_id, item in cart_data.items():
@@ -654,26 +589,18 @@ def checkout(request):
                 'uid': uuid.uuid4(),
                 'amount': amount_in_paisa,
             })
-        
-    # try:
-    #      active_address= Address.objects.get(user=request.user,status=True)
 
-    # except:
-    #      messages.warning(request,'Multiple address default, only one should be default')
     return render(request, 'core/checkout.html', {
         'cart_data': cart_data,
         'total_cart_items': len(cart_data),
         'cart_total_amount': cart_total_amount,
-        # 'active_address':active_address
     })
 
 @login_required
 def invoice(request):
     cart_total_amount = 0
-    # Safely get cart_data_obj from the session
     cart_data = request.session.get('cart_data_object', {})
 
-    # Calculate total amount if cart_data exists
     if cart_data:
         for product_id, item in request.session['cart_data_object'].items():
             cart_total_amount += int(item['qty']) * float(item['price'])  
@@ -687,12 +614,15 @@ def invoice(request):
 def order_detail(request, order_id):
     order = get_object_or_404(CartOrder, id=order_id, user=request.user)
     order_items = CartOrderItems.objects.filter(order=order)
+    order_date = order.order_date
     
     context = {
         'order': order,
-        'order_items': order_items
+        'order_items': order_items,
+        'order_date': order_date
     }
     return render(request, 'core/order_detail.html', context)
+    
 @login_required
 def customer_dashboard(request):
     orders_list=CartOrder.objects.filter(user=request.user).order_by('-id')
@@ -717,9 +647,11 @@ def customer_dashboard(request):
     return render(request, 'core/customer_dashboard.html', context)
 
 def make_default_address(request):
-    # pass
     id = request.GET.get('id')
     Address.objects.update(status=False)
     Address.objects.filter(id=id).update(status=True)
     return JsonResponse({'boolean': True})
-    
+
+def about_company(request):
+    about_company = get_object_or_404(About_company, id=1)  # Fetch the 'About Company' content
+    return render(request, 'core/about_company.html', {'about_company': about_company})
