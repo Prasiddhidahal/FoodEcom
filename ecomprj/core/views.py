@@ -190,10 +190,13 @@ def categories(request):
     categories = Category.objects.all()
     for category in categories:
         category.product_count = Product.objects.filter(category=category).count()
-
+    navbars = Navbar.objects.filter(status='Active').order_by('order')
+    footer=Footer.objects.filter()
     context = {
         'categories': categories,
         'products':products,
+        'navbars': navbars,
+        'footer':footer,
     }
 
     return render(request, 'core/category_products.html', context)
@@ -201,18 +204,26 @@ def categories(request):
 def category_product_list(request, cid):
     category = Category.objects.get ( cid=cid) 
     products = Product.objects.filter(product_status="published", category=category)
-    
+    navbars = Navbar.objects.filter(status='Active').order_by('order')
+    footer=Footer.objects.filter()
     context = {
         'category': category,
         'products': products,
+        'navbars': navbars,
+        'footer':footer,
+
     }
 
     return render(request, 'core/category_product_list.html', context)
 
 def contact(request):
     categories = Category.objects.all()
+    navbars = Navbar.objects.filter(status='Active').order_by('order')
+    footer=Footer.objects.filter()
     context = {
         'categories': categories,
+        'navbars': navbars,
+        'footer':footer,
     }
     return render(request, 'core/contact.html', context)
 
@@ -246,7 +257,8 @@ def shop(request):
     ).order_by('-mfd')[:6]
     vendors = Vendor.objects.all()  
     tags = Tag.objects.all()   
-
+    navbars = Navbar.objects.filter(status='Active').order_by('order')
+    footer=Footer.objects.filter()
     tag_slug = request.GET.get('tag') 
 
     if tag_slug:
@@ -258,7 +270,9 @@ def shop(request):
         'latest_products': latest_products,
         'vendors': vendors,  
         'tags': tags,  
-        'selected_tag': tag_slug 
+        'selected_tag': tag_slug,
+        'navbars': navbars,
+        'footer':footer,
     }
     return render(request, 'core/shop-grid.html', context)
 
@@ -274,22 +288,60 @@ def pages1(request, pid):
     if request.user.is_authenticated:
         address = Address.objects.filter(user=request.user).first()
 
-    ReviewForm = ProductReviewForm()
+    reviews=ProductReview.objects.filter(
+        product=product
+    ).order_by("-date")
+    star_range = list(range(1, 6))
+    # get 5 average rating
+     # Get the count of reviews for each rating (1 to 5 stars)
+    ratings = (
+        ProductReview.objects.filter(product=product)
+        .values('rating')
+        .annotate(count=Count('rating'))
+    )
+    product = get_object_or_404(
+        Product.objects.prefetch_related("color", "size"), 
+        id=pid
+    )
+    # Create a dictionary with default values (0) for each star rating
+    ratings_dict = {star: 0 for star in star_range}
 
-    # Calculate the average rating, defaulting to 0 if there are no reviews
-    average_rating = ProductReview.objects.filter(product=product).aggregate(Avg('rating'))['rating__avg'] or 0
-
-    # Create a star range for display purposes (1 to 5 stars)
-    star_range = [1, 2, 3, 4, 5]
-
+    # Populate the dictionary with actual counts from the query
+    for item in ratings:
+        ratings_dict[item['rating']] = item['count']
+    # Getting average review
+    average_review = ProductReview.objects.filter(product=product).aggregate(rating=Avg('rating'))
+    total_reviews = sum(ratings_dict.values())
+    ratings_percentage = {star: (ratings_dict[star] / total_reviews * 100) if total_reviews > 0 else 0.0
+                          for star in star_range}
+    make_review=True
+    if request.user.is_authenticated:
+            user_review_count = ProductReview.objects.filter(user=request.user,product=product).count()
+            if user_review_count > 0:
+                make_review=False
+    navbars = Navbar.objects.filter(status='Active').order_by('order')
+    footer=Footer.objects.filter()
+    
+    
+    # Add this line to access size choices
+    size = Product.size
+    color= Product.color
     context = {
         'review_form': ProductReviewForm(),
         'product': product,
         'related_products': related_products,
         'products_images': products_images,
-        'average_rating': average_rating,
-        'star_range': star_range,  
+        "reviews":reviews,
+        "average_review":average_review,
+        "star_range":star_range,
+        "ratings":ratings_dict,
+        "ratings_percentage":ratings_percentage,
+        "make_review":make_review,  
         'address': address,
+        'navbars': navbars,
+        'footer':footer,
+        'size': size,
+        'color':color,
     }
 
     return render(request, 'core/pages1.html', context)
@@ -297,7 +349,8 @@ def pages1(request, pid):
 def tag_list(request, tag_slug=None):
     products = Product.objects.filter(product_status="published").order_by("-id")
     tag = None
-
+    navbars = Navbar.objects.filter(status='Active').order_by('order')
+    footer=Footer.objects.filter()
     if tag_slug:
         tag = get_object_or_404(Tag, slug=tag_slug)  
         products = products.filter(tags__in=[tag])  
@@ -305,6 +358,8 @@ def tag_list(request, tag_slug=None):
     context = {
         'products': products,
         'tag': tag,
+        'navbars': navbars,
+        'footer':footer,
     }
     return render(request, 'core/tag.html', context)
 
@@ -345,9 +400,13 @@ def add_review(request, pid):
 def search_products(request):
     query = request.GET.get('q')
     products = Product.objects.filter(title__icontains=query)
+    navbars = Navbar.objects.filter(status='Active').order_by('order')
+    footer=Footer.objects.filter()
     context = {
         'products': products,
-        'query': query
+        'query': query,
+        'navbars': navbars,
+        'footer':footer,
     }
     return render(request, 'core/search.html', context)
 
@@ -436,51 +495,68 @@ def filter_product(request):
     })
 
 def add_to_cart(request):
+    color = request.GET.get('color', 'Default Color')
+    size = request.GET.get('size', 'Default Size')
+
+    # Convert price and quantity to appropriate types
+    price = float(request.GET.get('price', 0))
+    qty = int(request.GET.get('qty', 1))
+
     cart_product = {
         str(request.GET['id']): {
-            'title': request.GET['title'],
-            'price': float(request.GET['price']),  
-            'qty': int(request.GET['qty']),        
-            'image': request.GET['image'],
-            'pid': request.GET['pid'],
+            'title': request.GET.get('title', ''),
+            'price': price,
+            'qty': qty,
+            'image': request.GET.get('image', ''),
+            'pid': request.GET.get('pid', ''),
+            'color': color,
+            'size': size,
         }
     }
 
+    # Check if 'cart_data_object' exists in the session
     if 'cart_data_object' in request.session:
+        cart_data = request.session['cart_data_object']
 
-        if str(request.GET['id']) in request.session['cart_data_object']:
-            cart_data = request.session['cart_data_object']
-
-            cart_data[str(request.GET['id'])]['qty'] = int(cart_product[str(request.GET['id'])]['qty'])
-            cart_data.update(cart_data)
-            request.session['cart_data_object'] = cart_data 
+        # Update existing product in the cart
+        if str(request.GET['id']) in cart_data:
+            # Convert existing qty to integer before adding
+            cart_data[str(request.GET['id'])]['qty'] = int(cart_data[str(request.GET['id'])]['qty']) + qty
+            cart_data[str(request.GET['id'])]['color'] = color  # Ensure color is updated
+            cart_data[str(request.GET['id'])]['size'] = size  # Ensure size is updated
+            request.session['cart_data_object'] = cart_data
         else:
-            cart_data = request.session['cart_data_object']
+            # Add new product to the cart
             cart_data.update(cart_product)
             request.session['cart_data_object'] = cart_data
     else:
-
+        # Create a new cart and add the product
         request.session['cart_data_object'] = cart_product
+
+    # Debug: Print session data to the console to verify
+    print("Cart Data in Session:", request.session['cart_data_object'])
 
     return JsonResponse({
         "data": request.session['cart_data_object'],
         'totalcartitems': len(request.session['cart_data_object']),
-        
     })
+
 
 def cart_view(request):
     cart_total_amount = 0
     if 'cart_data_object' in request.session:
-        for product_id, item in request.session ['cart_data_object'].items():
+        for product_id, item in request.session['cart_data_object'].items():
             cart_total_amount += int(item['qty']) * float(item['price'])
-        return render(request, 'core/shoping-cart.html',{
+        
+        return render(request, 'core/shoping-cart.html', {
             "cart_data": request.session['cart_data_object'],
-            'total_cart_items':len(request.session['cart_data_object']),
-            'cart_total_amount':cart_total_amount, 
+            'total_cart_items': len(request.session['cart_data_object']),
+            'cart_total_amount': cart_total_amount,
         })
     else:
         messages.error(request, 'Your cart is empty')
         return redirect('core:index')
+
 
 def remove_from_cart(request):
     product_id = request.GET['id']
@@ -513,6 +589,7 @@ def update_from_cart(request):
     product_id = str(request.GET['id'])
     product_qty = request.GET['qty']
     
+    
     if "cart_data_object" in request.session:
         if product_id in request.session["cart_data_object"]:
             cart_data = request.session["cart_data_object"]
@@ -523,11 +600,14 @@ def update_from_cart(request):
     if 'cart_data_object' in request.session:
         for product_id, item in request.session['cart_data_object'].items():
             cart_total_amount += int(item['qty']) * float(item['price'])
+    
+
 
     context = {
         'cart_data': request.session['cart_data_object'],
         'total_cart_items': len(request.session['cart_data_object']),
         'cart_total_amount': cart_total_amount,
+
     }
 
     cart_list_html = render_to_string('core/async/cart-list.html', context)
@@ -541,9 +621,11 @@ def checkout(request):
     cart_total_amount = 0
     cart_data = request.session.get('cart_data_object', {})  
 
+
     if cart_data:
         for product_id, item in cart_data.items():
             cart_total_amount += int(item['qty']) * float(item['price'])
+
 
     if request.method == 'POST':
         cart_total_amount = 0
@@ -552,6 +634,7 @@ def checkout(request):
             order = CartOrder.objects.create(
                 user=request.user,
                 price=cart_total_amount
+
             )
             for product_id, item in cart_data.items():
                 CartOrderItems.objects.create(
@@ -602,14 +685,15 @@ def invoice(request):
     cart_data = request.session.get('cart_data_object', {})
 
     if cart_data:
-        for product_id, item in request.session['cart_data_object'].items():
+        for product_id, item in cart_data.items():
             cart_total_amount += int(item['qty']) * float(item['price'])  
 
     return render(request, "core/invoice.html", {
-        'cart_data': request.session['cart_data_object'],
-        'total_cart_items': len(request.session['cart_data_object']),
+        'cart_data': cart_data,
+        'total_cart_items': len(cart_data),
         'cart_total_amount': cart_total_amount,
     })
+
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(CartOrder, id=order_id, user=request.user)

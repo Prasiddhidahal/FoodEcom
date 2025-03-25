@@ -37,6 +37,8 @@
         <tr>
             <th>Description</th>
             <th>Quantity</th>
+            <th>Color</th>
+            <th>Size</th>
             <th>Unit Price</th>
             <th>Total</th>
         </tr>
@@ -51,16 +53,24 @@
             <td class="shoping__cart__quantity">
                 {{ p.qty }}
             </td>
+            <td class="shoping__cart__color">
+               
+                {{ p.color }}  <!-- Display selected color -->
+            </td>
+            <td class="shoping__cart__size">
+                {{ p.size }}  <!-- Display selected size -->
+            </td>
             <td class="shoping__cart__price">
                 ${{ p.price }}
             </td>
             <td class="shoping__cart__total">
-                ${{ p.price|floatformat:2 }}
+                ${{ p.qty|floatformat:2 }}
             </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
 
 <!-- Total Row -->
 <div class="checkout__order__total">

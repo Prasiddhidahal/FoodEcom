@@ -14,6 +14,7 @@ STATUS_CHOICES = [
     ('Pending', 'Pending'),
     ('Discontinued', 'Discontinued'),
     ('Inactive', 'Inactive'),
+    ('InStock', 'In Stock'),
     
 ]
 PRODUCT_STATUS_CHOICES = [
@@ -52,6 +53,20 @@ ACTION_TYPES = (
         ('CATEGORY_DELETED', 'Category Deleted'),
     )
 
+COLOR_CHOICES = [
+        ('#000000', 'Black'),
+        ('#A52A2A', 'Brown'),
+        ('#000080', 'Navy Blue'),
+        # Add more color choices as needed
+    ]
+
+SIZE_CHOICES = [
+        ('S', 'Small'),
+        ('M', 'Medium'),
+        ('L', 'Large'),
+        ('XL', 'Extra Large'),
+        ('XXL', 'Double Extra Large'),
+    ]
 # Helper function to generate upload path
 def user_directory_path(instance, filename):
     return 'user/{0}/{1}'.format(instance.title, filename)
@@ -203,7 +218,19 @@ class Vendor(models.Model):
 
 class Tags(models.Model):
     pass
+class Color(models.Model):
+    name = models.CharField(max_length=50)
+    hex_code = models.CharField(max_length=7)
 
+    def __str__(self):
+        return self.name
+
+class Size(models.Model):
+    name = models.CharField(max_length=10)
+    code = models.CharField(max_length=5)
+
+    def __str__(self):
+        return self.name
 class Product(models.Model):
     pid = ShortUUIDField(unique=True, length=10, max_length=20, alphabet="abcdegh12345")
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -226,7 +253,8 @@ class Product(models.Model):
     digital = models.BooleanField(default=False)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE, related_name='products')  # Rename to lowercase 'vendor'
     weight = models.FloatField(default=0)
-    color = models.CharField(max_length=50, default="White")
+    color = models.ManyToManyField(Color, related_name='products')
+    size = models.ManyToManyField(Size, related_name='products')
     mfd=models.DateField(auto_now_add=True)
     life=models.IntegerField(default=30)
     shipping = models.CharField(max_length=100, default="Free Shipping")
@@ -274,7 +302,9 @@ class CartOrder(models.Model):
     payment_completed = models.BooleanField(default=False)
     sold_quantity = models.IntegerField(default=0)
     in_stock = models.IntegerField(default=1, blank=True, null=True)
-
+    color = models.ManyToManyField(Color)
+    size = models.ManyToManyField(Size)
+    
     class Meta:
         verbose_name_plural = "Cart Orders"
 
@@ -290,6 +320,8 @@ class CartOrderItems(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default="1.99")
     total = models.DecimalField(max_digits=10, decimal_places=2, default="1.99")
     invoice_no = models.CharField(max_length=255, blank=True, null=True)
+    color = models.ManyToManyField(Color)
+    size = models.ManyToManyField(Size)
     class Meta:
         verbose_name_plural = "Cart Order Items"
 

@@ -10,8 +10,7 @@
                 <div class="breadcrumb__text">
                     <h2>{{ product.title }}</h2>
                     <div class="breadcrumb__option">
-                        <a href="{% url 'core:index' %}">Home</a>
-                        <a href="{% url 'core:index' %}">Products</a>
+                        
                         <span>{{ product.title }}</span>
                     </div>
                 </div>
@@ -81,12 +80,57 @@
 
         <!-- Add to Cart Button -->
 {% comment %} <input type="hidden" value="1" id="product-quantity" class="product-quantity-{{ product.id }}">  {% endcomment %}
-<input type="hidden" value="{{product.id}}" id="product-id" class="product-id-{{ product.id }}">
-<input type="hidden" value="{{product.pid}}" id="product-pid" class="product-pid-{{ product.id }}">
-<input type="hidden" class = "product-image-{{product.id}}" id="product-image" value="{{ product.image.url }}">
-<input type="hidden" class = "product-price-{{ product.id }}" id="product-price" value="{{ product.price }}">
-<input type="hidden" class = "product-title-{{ product.id }}" id="product-title" value="{{ product.title }}">
-<button class="add-to-cart" data-index="{{ product.id }}">Add to Cart</button>
+<div class="product__details__quantity">
+    <div class="quantity">
+        
+        <div class="color">
+            <h5>Color</h5>
+            <div class="color-choose">
+                {% for color in product.color.all %}
+                    <div class="size-pill">
+                        <label>
+                            <input type="radio" name="color-choice-{{ product.id }}" class="color-choice" value="{{ color.name }}">
+                            {{ color.name }}
+                        </label>
+                    </div>
+                {% empty %}
+                    <span>No colors available</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Add size selection if applicable -->
+        <div class="size">
+            <h5>Size</h5>
+            <div class="size-choose">
+                {% for size in product.size.all %}
+                    <div class="size-pill">
+                        <label>
+                            <input type="radio" name="size-choice-{{ product.id }}" class="size-choice" value="{{ size.name }}">
+                            {{ size.name }}
+                        </label>
+                    </div>
+                {% empty %}
+                    <span>No sizes available</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Cart Button -->
+
+    <input type="hidden" value="{{product.id}}" id="product-id" class="product-id-{{ product.id }}">
+    <input type="hidden" value="{{product.pid}}" id="product-pid" class="product-pid-{{ product.id }}">
+    <input type="hidden" class="product-image-{{ product.id }}" id="product-image" value="{{ product.image.url }}">
+    <input type="hidden" class="product-price-{{ product.id }}" id="product-price" value="{{ product.price }}">
+    <input type="hidden" class="product-title-{{ product.id }}" id="product-title" value="{{ product.title }}">
+    {% comment %} <input type="hidden" class="product-color-{{ product.id }}" id="product-color" value="{{ product.color.first.name }}">
+    <input type="hidden" class="product-size-{{ product.id }}" id="product-size" value="{{ product.size.first.name }}"> {% endcomment %}
+    <input type="hidden" class="product-color-{{ product.id }}" id="product-color" value="{% for color in product.color.all %}{{ color.name }}{% if not forloop.last %},{% endif %}{% endfor %}">
+<input type="hidden" class="product-size-{{ product.id }}" id="product-size" value="{% for size in product.size.all %}{{ size.name }}{% if not forloop.last %},{% endif %}{% endfor %}">
+
+    <button class="add-to-cart" data-index="{{ product.id }}">Add to Cart</button>
+</div>
 
 
 
@@ -98,7 +142,28 @@
             <li><b>Vendor</b> <span>{{ product.vendor.title }}</span></li>
             <li><b>Shipping</b> <span>{{ product.shipping }}</span></li>
             <li><b>Weight</b> <span>{{ product.weight }}</span></li>
-            <li><b>Color</b> <span>{{ product.color }}</span></li>
+             <li><b>Available Sizes</b>
+    <div class="size-options">
+        {% for color in product.color.all %}
+            <div class="size-pill">
+                {{ color.name }}
+            </div>
+        {% empty %}
+            <span>No colors available</span>
+        {% endfor %}
+    </div>
+</li>
+            <li><b>Available Sizes</b>
+    <div class="size-options">
+        {% for size in product.size.all %}
+            <div class="size-pill">
+                {{ size.name }}
+            </div>
+        {% empty %}
+            <span>No sizes available</span>
+        {% endfor %}
+    </div>
+</li>
             <li><b>Tags:</b>
                 {% for tag in product.tags.all %}
                     <a href="{% url 'core:tag_list' tag.slug %}" style="color: blue;">#{{ tag.name }}</a>
@@ -106,7 +171,17 @@
             </li>
             <li><b>MFD</b> <span>{{ product.mfd }}</span></li>
             <li><b>EXP</b> <span>{{ product.life }} days</span></li>
-            <li><b>Stock</b> <span>{{ product.stock_quantity }}</span></li>
+            <li><b>Stock</b> 
+    <span>
+        {% if product.stock_quantity == 0 %}
+            Out of Stock
+        {% elif product.stock_quantity < 5 %}
+            Low Stock
+        {% else %}
+            In Stock
+        {% endif %}
+    </span>
+</li>
             <li><b>Share on</b>
                 <div class="share">
                     <a href="#"><i class="fa fa-facebook"></i></a>
@@ -131,9 +206,103 @@
                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabs-2" role="tab" aria-selected="false">Additional Information</a></li>
                     <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab" aria-selected="false">Vendor</a></li>
                    <li class="nav-item">
-  <a class="nav-link" data-toggle="tab" href="#tabs-4" role="tab" aria-selected="false">
-    Reviews <span>{{ review.count }}</span>
-  </a>
+  <div class="tab-pane" id="tabs-3" role="tabpanel">
+                                <div class="product__details__tab__desc">
+                                    <div class="reviews-section">
+                                        <h6>Customer Reviews & Ratings</h6>
+                                        <div class="reviews-container">
+                                            <div class="reviews-list">
+                                                {% for review in reviews %}
+                                                <div class="review-item">
+                                                   
+                                                    <div class="review-middle">
+                                                        <h4 class="user-name">{{ review.user.username|title }}</h4>
+                                                        <div class="star-rating">
+                                                            {% for i in star_range %}
+                                                                {% if i <= review.rating %}
+                                                                    <span class="star">&#9733;</span> <!-- Filled star -->
+                                                                {% else %}
+                                                                    <span class="star empty">&#9733;</span> <!-- Empty star -->
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="review-content">
+                                                            <p>{{ review.review }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="review-right">
+                                                        <small class="review-time">{{ review.date|date:"M j, Y, g:i a" }}</small>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                    
+                                            <!-- Review Summary Section on the Right Side -->
+                                            <div class="review-summary"> 
+                                                <h5>Rating Breakdown</h5>
+                                                <p class="average-rating">{{ average_review.rating|floatformat }} out of 5.0</p>
+                                                {% for star, percentage in ratings_percentage.items %}
+                                                    <div class="rating-bar">
+                                                        <span class="star-label">{{ star }} Star</span>
+                                                        <div class="bar">
+                                                            {% if percentage == 0 %}
+                                                              
+                                                            {% else %}
+                                                            <div class="filled" style="width: {{ percentage }}%;"></div>
+                                                            {% endif %}
+                                                        </div>
+                                                        <span class="percentage-text">
+                                                            {% if percentage == 0 %}
+                                                              0%
+                                                            {% else %}
+                                                            
+                                                            {{ percentage|floatformat }}%
+                                                            {% endif %}
+                                                          
+                                                        </span>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            
+                                            
+                                        </div>
+                                    </div>
+                                    {% if make_review == True %}
+                                    {% if request.user.is_authencated %}
+                                    <strong class="text-success" id="review-res"></strong>
+                                    <div class="leave-review" id="hide_review_form">
+                                        <h6>Add a Review</h6>
+                                        <form action="{% url 'core:addProductReview' product.id %}" method="post" class="review-form" id="reviewForm">
+                                        {% comment %} <form action="{% url 'submit_review' product.id %}" method="post" class="review-form"> {% endcomment %}
+                                            {% csrf_token %}
+                                            <div class="form-group">
+                                                <label for="rating">Your Rating:</label>
+                                                <div class="star-input">
+                                                    {% for i in star_range reversed %}
+                                                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
+                                                        <label for="star{{ i }}">&#9733;</label>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    
+                                                    {{ review_form.review }}
+                                                </div>
+                                                
+                                                <button type="submit" class="submit-btn">Submit Review</button>
+                                            </form>
+                                        </div>
+                                        {% endif %}
+                                        {% endif %}
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    
+                                </div>
+                            </div>
 </li>
 
                 </ul>

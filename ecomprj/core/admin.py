@@ -1,5 +1,5 @@
 from django.contrib import admin
-from core.models import About_company, Ad, Adimage, Product, Category, Vendor, CartOrder, CartOrderItems, ProductImages, ProductReview, Wishlist, Address,Tags,  CategoryImage, Navbar, Slider, Footer, About_company
+from core.models import About_company, Ad, Adimage, Color, Product, Category, Size, Vendor, CartOrder, CartOrderItems, ProductImages, ProductReview, Wishlist, Address,Tags,  CategoryImage, Navbar, Slider, Footer, About_company
 
 
 @admin.register(Navbar)
@@ -15,6 +15,17 @@ class FooterAdmin(admin.ModelAdmin):
     list_filter = ('status', 'parent', 'created_by')
     search_fields = ('title', 'url', 'status', 'order', 'parent', 'created_by', 'logo')
 
+class ColorAdmin(admin.ModelAdmin):
+    list_display = ['name', 'hex_code']
+
+class SizeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'code']
+
+class ProductAdmin(admin.ModelAdmin):
+    filter_horizontal = ('colors', 'sizes')  # For better selection interface
+
+admin.site.register(Color, ColorAdmin)
+admin.site.register(Size, SizeAdmin)
 @admin.register(About_company)
 class AboutAdmin(admin.ModelAdmin):
     list_display = ('title', 'description', 'updated_by')
@@ -66,7 +77,8 @@ class TagsAdmin(admin.ModelAdmin):
 
 # Admin class for managing CartOrder model in the admin interface
 class CartOrderAdmin(admin.ModelAdmin):
-    list_display = ['user', 'price', 'paid_status', 'order_date', 'product_status']
+    list_display = ['user', 'price', 'paid_status', 'order_date', 'product_status', ]
+    
 
 class AddressesAdmin(admin.ModelAdmin):
     list_editable = ['address', 'status']

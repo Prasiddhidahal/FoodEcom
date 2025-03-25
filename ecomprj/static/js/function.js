@@ -96,6 +96,21 @@ $(document).ready(function () {
     let this_val = $(this);
     let index = this_val.attr("data-index");
 
+    // Get selected color and size
+    let color = $("input[name='color-choice-" + index + "']:checked").val();
+    let size = $("input[name='size-choice-" + index + "']:checked").val();
+
+    // Validate if color and size are selected
+    if (!color) {
+      alert("Please select a color.");
+      return;
+    }
+
+    if (!size) {
+      alert("Please select a size.");
+      return;
+    }
+
     let product_data = {
       id: $(".product-id-" + index).val(),
       title: $(".product-title-" + index).val(),
@@ -103,6 +118,8 @@ $(document).ready(function () {
       qty: $(".product-quantity-" + index).val(),
       image: $(".product-image-" + index).val(),
       pid: $(".product-pid-" + index).val(),
+      color: $(".product-color-" + index).val(),
+      size: $(".product-size-" + index).val(),
     };
 
     $.ajax({
@@ -118,9 +135,9 @@ $(document).ready(function () {
         $("#cart-total-price").text("$" + response.cart_total_amount);
         this_val.html("✅");
       },
-      
     });
   });
+
 
   // Remove from cart
   $(document).on("click", ".delete-product", function (e) {
